@@ -17,9 +17,11 @@ export const initialState: { welcomeData: WelcomeData } = {
 export const fetchWelcomeData = createAsyncThunk(
   'bancorAPI/fetchWelcomeData',
   async () => {
-    return await getWelcomeData();
+    return getWelcomeData();
   }
 );
+
+export const fetchPoolsAction = () => ({ type: "FETCH_POOLS"});
 
 const userSlice = createSlice({
   name: 'bancorAPI',
