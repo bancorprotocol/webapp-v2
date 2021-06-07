@@ -10,9 +10,9 @@ import { LayoutHeader } from './elements/layoutHeader/LayoutHeader';
 export const App = () => {
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch(fetchWelcomeData());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(fetchWelcomeData());
+  // }, [dispatch]);
 
   return (
     <BrowserRouter>

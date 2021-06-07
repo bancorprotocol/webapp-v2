@@ -17,6 +17,7 @@
     "react-intl": "^5.17.6",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.3",
+    "redux-observable": "^1.2.0",
     "rxjs": "6.6.7",
     "waait": "^1.0.5",
     "web-vitals": "^1.0.1",
