@@ -31,3 +31,11 @@ export interface MinimalPool {
   converterAddress: string;
   reserves: string[];
 }
+
+export interface ViewToken {
+  symbol: string;
+  name: string;
+  logoURI: string;
+}
+
+export interface ViewPool {}

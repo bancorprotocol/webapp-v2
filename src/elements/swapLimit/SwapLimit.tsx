@@ -1,21 +1,28 @@
-import { WelcomeData } from 'api/bancor';
 import { TokenInputField } from 'components/tokenInputField/TokenInputField';
-import { useAppSelector } from 'redux/index';
+import { balances$ } from 'observables/balances';
+import { apiTokens$ } from 'observables/pools';
+import { useObservable } from 'rxjs-hooks';
 
 export const SwapLimit = () => {
-  const welcomeData = useAppSelector<WelcomeData>(
-    (state) => state.bancorAPI.welcomeData
-  );
+  const tokens = useObservable(() => apiTokens$, []);
+  const balances = useObservable(() => balances$, {});
+
+  if (tokens.length == 0) {
+    return <p>Loading..</p>;
+  }
+
+  const fromToken = tokens[0];
+  const toToken = tokens[3];
 
   return (
     <div>
       <div className="px-20">
         <TokenInputField
           label="You Pay"
-          balance={123.4567}
+          balance={Number(balances[fromToken.dlt_id] || 0)}
           balanceUsd={98.76}
           border
-          initialToken={welcomeData.tokens[0]}
+          initialToken={fromToken}
         />
       </div>
 
@@ -23,9 +30,9 @@ export const SwapLimit = () => {
         <div className="mx-10 mb-16">
           <TokenInputField
             label="You Receive"
-            balance={123.4567}
+            balance={Number(balances[toToken.dlt_id] || 0)}
             balanceUsd={98.76}
-            initialToken={welcomeData.tokens[3]}
+            initialToken={toToken}
           />
 
           <div className="flex justify-between mt-15">

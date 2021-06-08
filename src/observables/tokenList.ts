@@ -39,7 +39,7 @@ const userPicked$ = of<TokenListItem[]>([]).pipe(
   map((tokens) => tokens.map(tokenListToMinimal))
 );
 
-const tokenList$ = combineLatest([userPicked$, defaultTokenList$]).pipe(
+export const tokenList$ = combineLatest([userPicked$, defaultTokenList$]).pipe(
   map(([userPicked, tokenList]) => {
     const mixed = [...userPicked, ...tokenList];
     return uniqWith(mixed, (a, b) => a.address === b.address);

@@ -1,18 +1,15 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { getWelcomeData, WelcomeData } from 'api/bancor';
-
-interface ViewToken {
-  symbol: string;
-  name: string;
-  logoURI: string;
-}
-
-interface ViewPool {}
+import { ViewPool, ViewToken } from 'web3/types';
 
 interface InitialState {
   welcomeData: WelcomeData;
   tokens: ViewToken[];
   pools: ViewPool[];
+  totalLiquidityUsd: null | number;
+  totalVolume24h: null | number;
+  bntPrice: null | number;
+  bntPrice24hAgo: null | number;
 }
 
 export const initialState: InitialState = {
@@ -28,6 +25,10 @@ export const initialState: InitialState = {
   },
   tokens: [],
   pools: [],
+  totalLiquidityUsd: null,
+  totalVolume24h: null,
+  bntPrice: null,
+  bntPrice24hAgo: null,
 };
 
 export const fetchWelcomeData = createAsyncThunk(

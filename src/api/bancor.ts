@@ -64,6 +64,7 @@ export interface Token {
   rate: BntPrice;
   rate_24h_ago: BntPrice;
   decimals: number;
+  logo_uri?: string;
 }
 
 export interface TokenMetaWithReserve extends TokenMeta {
