@@ -1,5 +1,5 @@
-import { getWelcomeData, WelcomeData } from 'api/bancor';
-import { isEqual, zip } from 'lodash';
+import { getWelcomeData, Pool, Swap, WelcomeData } from 'api/bancor';
+import { isEqual, uniqBy, uniqWith, zip } from 'lodash';
 import { combineLatest, of, Subject } from 'rxjs';
 import {
   distinctUntilChanged,
@@ -8,6 +8,7 @@ import {
   share,
   shareReplay,
   startWith,
+  withLatestFrom,
 } from 'rxjs/operators';
 import { ConverterAndAnchor } from 'web3/types';
 import { bancorConverterRegistry$ } from './contracts';
@@ -121,4 +122,87 @@ export const trigger = () => {
     setTokens(tokens);
     balance.fetchBalances(['0x1F573D6Fb3F13d689FF844B4cE37794d79a7FF1C']);
   });
+};
+
+interface SwapOptions {
+  fromId: string;
+  toId: string;
+  decAmount: string;
+}
+
+interface MinimalPool {
+  anchorAddress: string;
+  contract: string;
+  reserves: string[];
+}
+
+const toMinimal = (pool: Pool): MinimalPool => ({
+  anchorAddress: pool.pool_dlt_id,
+  contract: pool.converter_dlt_id,
+  reserves: pool.reserves.map((reserve) => reserve.address),
+});
+
+const swapReceiver$ = new Subject<SwapOptions>();
+
+const sortByLiqDepth = (a: Pool, b: Pool) =>
+  Number(b.liquidity.usd) - Number(a.liquidity.usd);
+
+const dropDuplicateReservesByHigherLiquidity = (pools: Pool[]) => {
+  const sortedByLiquidityDepth = pools.sort(sortByLiqDepth);
+  const uniquePools = uniqBy(sortedByLiquidityDepth, 'pool_dlt_id');
+
+  return uniquePools;
+};
+
+const poolHasBalances = (pool: Pool) =>
+  pool.reserves.every((reserve) => reserve.balance !== '0');
+
+const filterTradeWorthyPools = (pools: Pool[]) => {
+  const poolsWithBalances = pools.filter(poolHasBalances);
+  const removedDuplicates =
+    dropDuplicateReservesByHigherLiquidity(poolsWithBalances);
+  return removedDuplicates;
+};
+
+const findPath = (from: string, to: string, pools: MinimalPool[]) => {
+  const singlePool = pools.find((pool) =>
+    [from, to].every((tradedToken) =>
+      pool.reserves.some((reserve) => tradedToken === reserve)
+    )
+  );
+  if (singlePool) {
+    return singlePool;
+  }
+
+  const validStartingPools = pools.filter((relay) =>
+    relay.reserves.some((reserve) => reserve === from)
+  );
+  const validTerminatingPools = pools.filter((relay) =>
+    relay.reserves.some((reserve) => reserve === to)
+  );
+  const areSufficientPools =
+    validStartingPools.length > 0 && validTerminatingPools.length > 0;
+
+  if (!areSufficientPools)
+    throw new Error(`No pools found containing both the from and to target`);
+
+  const moreThanOneStartingPool = validStartingPools.length > 1;
+  if (moreThanOneStartingPool) {
+  } else {
+  }
+  const onlyPoolNeeded = [];
+};
+
+const swapTx$ = swapReceiver$.pipe(
+  withLatestFrom(pools$),
+  map(([options, pools]) => {
+    const winningPools = filterTradeWorthyPools(pools);
+    const minimalPools = winningPools.map(toMinimal);
+  })
+);
+
+export const tx = {
+  swap: function (fromId: string, toId: string, decAmount: string) {
+    swapReceiver$.next({ fromId, toId, decAmount });
+  },
 };
