@@ -1,4 +1,5 @@
 import { chunk, uniq, uniqWith } from 'lodash';
+import wait from 'waait';
 
 type Node = string;
 type Edge = [string, string];
@@ -51,6 +52,9 @@ export async function findNewPath<T>(
   pools: T[],
   identifier: (pool: T) => Edge
 ) {
+  await wait(1000).then(() => {
+    throw new Error('Failed finding path within timeout');
+  });
   const edges = uniqWith(pools.map(identifier), compareEdge);
   const nodes: Node[] = uniq(edges.flat(1));
 

@@ -1,5 +1,5 @@
 import { getWelcomeData, Pool, Swap, WelcomeData } from 'api/bancor';
-import { isEqual, uniqBy, uniqWith, zip } from 'lodash';
+import { isEqual, partition, uniq, uniqBy, uniqWith, zip } from 'lodash';
 import { combineLatest, of, Subject } from 'rxjs';
 import {
   distinctUntilChanged,
@@ -24,6 +24,9 @@ import { toChecksumAddress } from 'web3-utils';
 import { updateArray } from 'helpers';
 import { setTokens } from 'redux/bancorAPI/bancorAPI';
 import { balance } from './balances';
+import { findNewPath } from 'helpers/findPath';
+import { mapIgnoreThrown } from 'helpers/mapIgnoreThrown';
+import { isJSDocNamepathType } from 'typescript';
 
 const zipAnchorAndConverters = (
   anchorAddresses: string[],
@@ -164,41 +167,108 @@ const filterTradeWorthyPools = (pools: Pool[]) => {
   return removedDuplicates;
 };
 
-const findPath = (from: string, to: string, pools: MinimalPool[]) => {
+const minimalPoolReserves = (pool: MinimalPool): [string, string] => {
+  if (pool.reserves.length !== 2)
+    throw new Error('Was expecting a pool of 2 reserves');
+  return pool.reserves as [string, string];
+};
+
+type TradePath = MinimalPool[];
+
+const possiblePaths = async (
+  from: string,
+  to: string,
+  pools: MinimalPool[]
+): Promise<TradePath[]> => {
   const singlePool = pools.find((pool) =>
     [from, to].every((tradedToken) =>
       pool.reserves.some((reserve) => tradedToken === reserve)
     )
   );
   if (singlePool) {
-    return singlePool;
+    return [[singlePool]];
   }
 
-  const validStartingPools = pools.filter((relay) =>
-    relay.reserves.some((reserve) => reserve === from)
+  const [validStartingPools, remainingPools] = partition(pools, (pool) =>
+    pool.reserves.some((reserve) => reserve === from)
   );
-  const validTerminatingPools = pools.filter((relay) =>
+  const isValidTerminatingPool = pools.some((relay) =>
     relay.reserves.some((reserve) => reserve === to)
   );
   const areSufficientPools =
-    validStartingPools.length > 0 && validTerminatingPools.length > 0;
+    validStartingPools.length > 0 && isValidTerminatingPool;
 
   if (!areSufficientPools)
     throw new Error(`No pools found containing both the from and to target`);
 
   const moreThanOneStartingPool = validStartingPools.length > 1;
   if (moreThanOneStartingPool) {
+    const results = await mapIgnoreThrown(
+      validStartingPools,
+      async (validStartingPool) => {
+        const isolatedPools = [validStartingPool, ...remainingPools];
+        const poolPath = await findNewPath(
+          from,
+          to,
+          isolatedPools,
+          minimalPoolReserves
+        );
+        return poolPath.hops.flatMap((hop) => hop[0]);
+      }
+    );
+    return results;
   } else {
+    const res = await findNewPath(from, to, pools, minimalPoolReserves);
+    return [res.hops.flatMap((hop) => hop[0])];
   }
-  const onlyPoolNeeded = [];
 };
 
-const swapTx$ = swapReceiver$.pipe(
+const hasAnchorOf = (anchor: string) => (pool: Pool) =>
+  pool.pool_dlt_id === anchor;
+
+const sortPathByBiggestStartingPool = (paths: TradePath[], pools: Pool[]) => {
+  const allAnchors = paths.flat(2);
+  const uniqueAnchors = uniq(allAnchors);
+  const allPoolsFound = uniqueAnchors.every((minimalPool) =>
+    pools.some(
+      (pool) =>
+        pool.pool_dlt_id === minimalPool.anchorAddress &&
+        pool.converter_dlt_id === minimalPool.contract
+    )
+  );
+  if (!allPoolsFound)
+    throw new Error('Not all paths anchors were found in pools array');
+  return paths.sort((a, b) => {
+    const startingA = a[0];
+    const startingB = b[0];
+    const startingAPool = pools.find(hasAnchorOf(startingA.anchorAddress))!;
+    const startingBPool = pools.find(hasAnchorOf(startingB.anchorAddress))!;
+    return sortByLiqDepth(startingAPool, startingBPool);
+  });
+};
+
+const tradePath$ = swapReceiver$.pipe(
   withLatestFrom(pools$),
-  map(([options, pools]) => {
+  switchMapIgnoreThrow(async ([trade, pools]) => {
     const winningPools = filterTradeWorthyPools(pools);
     const minimalPools = winningPools.map(toMinimal);
-  })
+
+    const potentialPaths = await possiblePaths(
+      trade.fromId,
+      trade.toId,
+      minimalPools
+    );
+    const [biggestStartingPath] = sortPathByBiggestStartingPool(
+      potentialPaths,
+      winningPools
+    );
+    return { path: biggestStartingPath, trade };
+  }),
+  shareReplay(1)
+);
+
+const swapTx$ = tradePath$.pipe(
+  switchMapIgnoreThrow(async ({ path, trade }) => {})
 );
 
 export const tx = {
