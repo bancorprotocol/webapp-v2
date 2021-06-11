@@ -8,6 +8,7 @@ import {
   share,
   shareReplay,
   startWith,
+  switchMap,
   withLatestFrom,
 } from 'rxjs/operators';
 import { ConverterAndAnchor } from 'web3/types';
@@ -24,9 +25,7 @@ import { toChecksumAddress } from 'web3-utils';
 import { updateArray } from 'helpers';
 import { setTokens } from 'redux/bancorAPI/bancorAPI';
 import { balance } from './balances';
-import { findNewPath } from 'helpers/findPath';
-import { mapIgnoreThrown } from 'helpers/mapIgnoreThrown';
-import { isJSDocNamepathType } from 'typescript';
+import { findOrThrow, findNewPath, mapIgnoreThrown } from 'helpers';
 
 const zipAnchorAndConverters = (
   anchorAddresses: string[],
@@ -118,6 +117,8 @@ export const apiTokens$ = apiData$.pipe(
   distinctUntilChanged<WelcomeData['tokens']>(isEqual),
   shareReplay()
 );
+
+export const tokens$ = apiTokens$.pipe(shareReplay(1));
 
 export const trigger = () => {
   apiTokens$.subscribe((tokens) => {
@@ -268,7 +269,16 @@ const tradePath$ = swapReceiver$.pipe(
 );
 
 const swapTx$ = tradePath$.pipe(
-  switchMapIgnoreThrow(async ({ path, trade }) => {})
+  withLatestFrom(tokens$),
+  switchMap(async ([{ path, trade }, tokens]) => {
+    const fromWei = findOrThrow(
+      tokens,
+      (token) => token.dlt_id === trade.fromId,
+      'failed finding from token in tokens observable'
+    );
+
+    // insert error handling here
+  })
 );
 
 export const tx = {
