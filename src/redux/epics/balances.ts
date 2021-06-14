@@ -19,6 +19,7 @@ import { toChecksumAddress } from 'web3-utils';
 import { InitialState } from 'redux/bancorAPI/bancorAPI';
 import { balanceFetcher } from 'web3/contracts/token/wrapper';
 import { partition } from 'lodash';
+import { shrinkToken } from 'utils/pureFunctions';
 
 interface Action<T = undefined> {
   payload?: T;
@@ -54,10 +55,7 @@ export const balancesEpic$ = (
         (balance) => tokens.some((token) => token.dlt_id === balance.address)
       );
 
-      // add shrink token
-      // expand token
-
-      return balances.map((balance) => {
+      return knownPrecisions.map((balance) => {
         const token = tokens.find((token) => token.dlt_id === balance.address)!;
         return [
           balance.address,

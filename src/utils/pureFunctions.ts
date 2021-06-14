@@ -1,4 +1,5 @@
 import { EthNetworks } from 'web3/types';
+import BigNumber from 'bignumber.js';
 
 export const shortenString = (
   string: string,
@@ -54,4 +55,28 @@ export const setAutoLogin = (flag: boolean) => {
 
 export const isAutoLogin = (): boolean => {
   return localStorage.getItem(autoLogin) === 'true';
+};
+
+export const shrinkToken = (
+  amount: string | number,
+  precision: number,
+  chopZeros = false
+) => {
+  if (!Number.isInteger(precision))
+    throw new Error(
+      `Must be passed integer to shrink token, received ${precision}`
+    );
+  const res = new BigNumber(amount)
+    .div(new BigNumber(10).pow(precision))
+    .toFixed(precision, BigNumber.ROUND_DOWN);
+
+  return chopZeros ? new BigNumber(res).toString() : res;
+};
+
+export const expandToken = (amount: string | number, precision: number) => {
+  const trimmed = new BigNumber(amount).toFixed(precision, 1);
+  const inWei = new BigNumber(trimmed)
+    .times(new BigNumber(10).pow(precision))
+    .toFixed(0);
+  return inWei;
 };

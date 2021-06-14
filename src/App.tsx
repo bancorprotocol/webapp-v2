@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
+// @ts-ignore
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { LayoutHeader } from './elements/layoutHeader/LayoutHeader';
-import { poolActions } from 'redux/actions';
 import { useWeb3React } from '@web3-react/core';
 import { Swap } from 'pages/Swap';
 import { Loading } from 'pages/Loading';
@@ -18,10 +18,6 @@ export const App = () => {
   const [loading, setLoading] = useState(true);
   const unsupportedNetwork = isUnsupportedNetwork(chainId);
   const triedAutoLogin = useAutoConnect();
-
-  useEffect(() => {
-    dispatch(poolActions.triggerAction());
-  }, [dispatch]);
 
   useEffect(() => {
     if (chainId || triedAutoLogin || !isAutoLogin()) setLoading(false);

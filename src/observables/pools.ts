@@ -24,7 +24,6 @@ import { web3 } from 'web3/contracts';
 import { toChecksumAddress } from 'web3-utils';
 import { updateArray } from 'helpers';
 import { setTokens } from 'redux/bancorAPI/bancorAPI';
-import { balance } from './balances';
 import { findOrThrow, findNewPath, mapIgnoreThrown } from 'helpers';
 
 const zipAnchorAndConverters = (
@@ -119,14 +118,6 @@ export const apiTokens$ = apiData$.pipe(
 );
 
 export const tokens$ = apiTokens$.pipe(shareReplay(1));
-
-export const trigger = () => {
-  apiTokens$.subscribe((tokens) => {
-    console.log(tokens, 'are the tokens');
-    setTokens(tokens);
-    balance.fetchBalances(['0x1F573D6Fb3F13d689FF844B4cE37794d79a7FF1C']);
-  });
-};
 
 interface SwapOptions {
   fromId: string;
