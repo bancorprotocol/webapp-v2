@@ -1,6 +1,7 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { getWelcomeData, WelcomeData } from 'api/bancor';
 import { ViewPool, ViewToken } from 'web3/types';
+import { createSlice } from '@reduxjs/toolkit';
+import { WelcomeData } from 'api/bancor';
+import { poolActions } from 'redux/actions';
 
 interface InitialState {
   welcomeData: WelcomeData;
@@ -31,13 +32,6 @@ export const initialState: InitialState = {
   bntPrice24hAgo: null,
 };
 
-export const fetchWelcomeData = createAsyncThunk(
-  'bancorAPI/fetchWelcomeData',
-  async () => {
-    return await getWelcomeData();
-  }
-);
-
 const userSlice = createSlice({
   name: 'bancorAPI',
   initialState,
@@ -53,7 +47,7 @@ const userSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(fetchWelcomeData.fulfilled, (state, action) => {
+    builder.addCase(poolActions.success, (state, action) => {
       state.welcomeData = action.payload;
     });
   },
