@@ -60,7 +60,8 @@ export const balancesEpic$ = (
         return [
           balance.address,
           shrinkToken(balance.weiBalance, token.decimals),
-        ];
+        ] as [string, string];
       });
-    })
+    }),
+    map(balanceActions.success)
   );

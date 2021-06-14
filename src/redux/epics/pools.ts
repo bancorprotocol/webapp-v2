@@ -1,12 +1,12 @@
-import { tap, mergeMap, map } from 'rxjs/operators';
-import { ofType } from 'redux-observable';
+import { mergeMap, map, filter } from 'rxjs/operators';
 import { pools$ } from 'observables/pools';
 import { poolActions } from 'redux/actions';
+import { isActionOf } from 'typesafe-actions';
+import { Pool } from 'api/bancor';
 
 export const poolsEpic$ = (action$: any) =>
   action$.pipe(
-    ofType(poolActions.trigger),
+    filter(isActionOf(poolActions.request)),
     mergeMap(() => pools$),
-    tap((data) => console.log(data, 'is on the tap')),
-    map((pools) => poolActions.successAction(pools))
+    map((pools) => poolActions.success(pools as Pool[]))
   );

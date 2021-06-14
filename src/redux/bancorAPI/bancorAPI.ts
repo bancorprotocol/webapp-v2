@@ -49,7 +49,7 @@ const userSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(poolActions.success, (state, action) => {
+    builder.addCase(poolActions.success([]).type, (state, action) => {
       state.welcomeData = action.payload;
     });
   },

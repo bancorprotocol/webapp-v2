@@ -1,5 +1,4 @@
 import { TokenInputField } from 'components/tokenInputField/TokenInputField';
-import { balances$ } from 'observables/balances';
 import { apiTokens$ } from 'observables/pools';
 
 export const SwapLimit = () => {
