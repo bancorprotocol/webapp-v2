@@ -1,11 +1,18 @@
-import { WelcomeData } from 'api/bancor';
+import { Pool, WelcomeData } from 'api/bancor';
 import { TokenInputField } from 'components/tokenInputField/TokenInputField';
+import { useEffect } from 'react';
 import { useAppSelector } from 'redux/index';
 
 export const SwapMarket = () => {
   const welcomeData = useAppSelector<WelcomeData>(
     (state) => state.bancorAPI.welcomeData
   );
+
+  const pools = useAppSelector<Pool[]>((state) => state.bancorAPI.pools);
+
+  useEffect(() => {
+    console.log('pools', pools);
+  }, [pools]);
 
   return (
     <div>
