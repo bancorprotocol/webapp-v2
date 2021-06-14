@@ -1,11 +1,11 @@
 import { TokenInputField } from 'components/tokenInputField/TokenInputField';
 import { balances$ } from 'observables/balances';
 import { apiTokens$ } from 'observables/pools';
-import { useObservable } from 'rxjs-hooks';
 
 export const SwapLimit = () => {
-  const tokens = useObservable(() => apiTokens$, []);
-  const balances = useObservable(() => balances$, {});
+  return <h1>toFix</h1>;
+  const tokens = [];
+  const balances = [];
 
   if (tokens.length == 0) {
     return <p>Loading..</p>;

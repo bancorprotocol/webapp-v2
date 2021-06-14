@@ -14603,6 +14603,11 @@ reduce-css-calc@^2.1.8:
     css-unit-converter "^1.1.1"
     postcss-value-parser "^3.3.0"
 
+redux-observable@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/redux-observable/-/redux-observable-1.2.0.tgz#ff51b6c6be2598e9b5e89fc36639186bb0e669c7"
+  integrity sha512-yeR90RP2WzZzCxxnQPlh2uFzyfFLsfXu8ROh53jGDPXVqj71uNDMmvi/YKQkd9ofiVoO4OYb1snbowO49tCEMg==
+
 redux-thunk@^2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/redux-thunk/-/redux-thunk-2.3.0.tgz#51c2c19a185ed5187aaa9a2d08b666d0d6467622"
@@ -15080,15 +15085,7 @@ rustbn.js@~0.2.0:
   resolved "https://registry.yarnpkg.com/rustbn.js/-/rustbn.js-0.2.0.tgz#8082cb886e707155fd1cb6f23bd591ab8d55d0ca"
   integrity sha512-4VlvkRUuCJvr2J6Y0ImW7NvTCriMi7ErOAqWk1y69vAdoNIzCF3yPmgeNzx+RQTLEDFq5sHfscn1MwHxP9hNfA==
 
-rxjs-hooks@^0.7.0:
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/rxjs-hooks/-/rxjs-hooks-0.7.0.tgz#01c00257afa3d602b28025f943ba613e9fa31e57"
-  integrity sha512-R7uSuiYkn5p0ig9dgdpiCyrRwoltTW70wtCNSalwxb+OWVuI1wkg3sYF/tLOtSXUm1n4eGwKkJgL65ICS3n/5A==
-  dependencies:
-    tslib "^2.1.0"
-    use-constant "^1.0.0"
-
-rxjs@6.6.7, rxjs@^6.5.3, rxjs@^6.6.3:
+rxjs@^6.5.3, rxjs@^6.6.3:
   version "6.6.7"
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-6.6.7.tgz#90ac018acabf491bf65044235d5863c4dab804c9"
   integrity sha512-hTdwr+7yYNIT5n4AMYp85KA6yw2Va0FLa3Rguvbpa4W3I5xynaBZo41cM3XM+4Q6fRMj3sBYIR1VAmZMXYJvRQ==
@@ -16904,11 +16901,6 @@ usb@^1.6.0:
     bindings "^1.4.0"
     node-addon-api "3.0.2"
     prebuild-install "^5.3.3"
-
-use-constant@^1.0.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/use-constant/-/use-constant-1.1.0.tgz#76d36a0edf16d4cc8565361f522b55da5f8f3f22"
-  integrity sha512-yrflEfv7Xv/W8WlYV6nwRH01K+2BpR4cWxuzY03yPRjYZuHixhGlvnJN5O2bRYrXGpJ4zy8QjFABGIQ2QXeBOA==
 
 use@^3.1.0:
   version "3.1.1"
