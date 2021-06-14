@@ -1,43 +1,20 @@
+import { Pool, Token } from 'api/bancor';
+import { createAsyncAction } from 'typesafe-actions';
 
 
-class Action {
+const createActions = <T, Y>(modelName: string) => {
+  const base = `FETCH_${modelName.toUpperCase()}_`;
+  return createAsyncAction(
+    base + 'REQUEST',
+    base + 'SUCCESS',
+    base + 'FAILURE',
+    base + 'CANCEL'
+  )<T, Y>
+};
 
 
-    name: string
+export const poolActions = createActions<undefined, Pool[]>('pools')
+export const tokenActions = createActions<undefined, Token[]>('tokens');
+export const balanceActions = createActions<string[], string[]>('balances');
 
-    constructor(name: string) {
-        this.name = name.toUpperCase()
-    }
 
-    get trigger() {
-        return this.append('trigger');
-    }
-
-    get success() {
-        return this.append('success')
-    }
-
-    get error() {
-        return this.append('error')
-    }
-
-    private action(name: string, payload?: any) {
-        return ({ type: name, ...(payload && ({ payload }))})
-    }
-
-    public triggerAction(payload?: any) {
-        return this.action(this.trigger, payload)
-    }
-
-    public successAction(payload?: any) {
-        return this.action(this.success, payload)
-    }
-
-    private append(label: string) {
-        return `FETCH_${this.name}_${label.toUpperCase()}`
-    }
-
-}
-
-export const poolActions = new Action('pools'); 
-export const tokenActions = new Action('tokens'); 

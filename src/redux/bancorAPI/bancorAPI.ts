@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import { WelcomeData } from 'api/bancor';
 import { poolActions } from 'redux/actions';
 
-interface InitialState {
+export interface InitialState {
   welcomeData: WelcomeData;
   tokens: ViewToken[];
   pools: ViewPool[];
@@ -11,6 +11,7 @@ interface InitialState {
   totalVolume24h: null | number;
   bntPrice: null | number;
   bntPrice24hAgo: null | number;
+  currentUser: string;
 }
 
 export const initialState: InitialState = {
@@ -30,6 +31,7 @@ export const initialState: InitialState = {
   totalVolume24h: null,
   bntPrice: null,
   bntPrice24hAgo: null,
+  currentUser: '',
 };
 
 const userSlice = createSlice({
