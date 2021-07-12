@@ -7,6 +7,8 @@ import { useDispatch } from 'react-redux';
 import { TokenListItem } from 'services/observables/tokens';
 import { useAppSelector } from 'redux/index';
 import { ethToken, wethToken } from 'services/web3/config';
+import { ReactComponent as IconLight } from 'assets/icons/light.svg';
+import { IntoTheBlock } from 'elements/intoTheBlock/intoTheBlock';
 
 export const Toggle = createContext(false);
 interface SwapWidgetProps {
@@ -22,7 +24,6 @@ export const SwapWidget = ({ isLimit, setIsLimit }: SwapWidgetProps) => {
   const [fromToken, setFromToken] = useState(tokens[0]);
   const [toToken, setToToken] = useState<TokenListItem | null>(null);
   const [toggle, setToggle] = useState(false);
-
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -85,6 +86,12 @@ export const SwapWidget = ({ isLimit, setIsLimit }: SwapWidgetProps) => {
             switchTokens={switchTokens}
           />
         )}
+        <button>
+          <IconLight />
+        </button>
+      </div>
+      <div className="flex justify-center">
+        <IntoTheBlock />
       </div>
       {isLimit ? (
         <div className="text-center text-10 text-grey-4 mt-18">

@@ -1,0 +1,72 @@
+.widget-container .itb-widget * {
+  font-family: 'Karla', sans-serif;
+}
+
+.widget-container .itb-widget .card,
+.widget-container .itb-widget .signals-content,
+.widget-container .itb-widget .itb-signals-global-summary {
+  box-shadow: 0 1px 4px 0 rgb(81 107 152 / 15%);
+  border: 1px solid #eeeeee;
+  border-radius: 4px;
+}
+.widget-container .itb-widget .token-summary-container .card .title {
+  font-weight: 600;
+}
+.widget-container .itb-widget .token-summary-container .card .title .text {
+  line-height: 13px;
+}
+.widget-container .itb-widget .token-summary-container .card .title .info-icon {
+  margin-top: 2px;
+}
+.widget-container
+  .itb-widget
+  .token-summary-container
+  .card
+  .legend-container
+  .value {
+  font-size: 18px;
+}
+.widget-container .itb-widget .token-summary-container .green {
+  color: #3ae374;
+}
+.widget-container .itb-widget .token-summary-container .bg-green {
+  background-color: #3ae374;
+}
+.widget-container .itb-widget .token-summary-container .gray {
+  color: #bdc3c7;
+}
+.widget-container .itb-widget .token-summary-container .bg-gray {
+  background-color: #bdc3c7;
+}
+.widget-container .itb-widget .token-summary-container .red {
+  color: #fd7272;
+}
+.widget-container .itb-widget .token-summary-container .bg-red {
+  background-color: #fd7272;
+}
+.widget-container .itb-widget .token-summary-container .blue {
+  color: #1b9cfc;
+}
+.widget-container .itb-widget .token-summary-container .bg-blue {
+  background-color: #1b9cfc;
+}
+.widget-container .itb-widget .token-summary-container .yellow {
+  color: #eab543;
+}
+.widget-container .itb-widget .token-summary-container .bg-yellow {
+  background-color: #eab543;
+}
+.widget-container
+  .itb-widget[data-type='quick-view']
+  .token-summary-container
+  .highcharts-series
+  .highcharts-graph {
+  stroke: #1b9cfc;
+}
+.widget-container
+  .itb-widget[data-type='quick-view']
+  .token-summary-container
+  .highcharts-series
+  .highcharts-area {
+  fill: #eff2f5;
+}
