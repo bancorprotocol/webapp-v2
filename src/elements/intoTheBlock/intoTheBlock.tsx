@@ -26,9 +26,31 @@ export const IntoTheBlock = () => {
               bullish: '#3ae374',
             },
           },
+          tokenSummary: {
+            showHoldersMakingMoneyAtCurrentPrice: true,
+            showConcentrationByLargeHolders: true,
+            showHoldersCompositionByTimeHeld: true,
+            showPriceCorrelationWithBitcoin: false,
+            showTransactionsGreaterThan100K: false,
+            showTransactionDemographics: false,
+            showTelegramMembersChange: false,
+            showVolatility: false,
+            showTotalExchangesInflow: false,
+            showTotalExchangesOutflow: false,
+          },
         },
       });
     };
+
+    document.getElementById('total-exchanges-inflows')?.remove();
+    document.getElementById('total-exchanges-outflows')?.remove();
+    const signals = document.getElementsByClassName(
+      'signals-content sc-bwzfXH icICro'
+    );
+    if (signals && signals.length > 0) signals[0].remove();
+    const actions = document.getElementsByClassName('actions');
+    if (actions && actions.length > 0) actions[0].remove();
+
     const element = document.getElementById(into_the_block);
     if (element) element.appendChild(script);
 
