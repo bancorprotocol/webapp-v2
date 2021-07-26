@@ -32,6 +32,7 @@ import {
 import { useAppSelector } from 'redux/index';
 import { web3 } from 'services/web3/contracts';
 import { provider } from 'services/web3/wallet/connectors';
+import { Insight } from 'elements/insight/Insight';
 
 export const App = () => {
   const dispatch = useDispatch();
@@ -98,6 +99,7 @@ export const App = () => {
         <main className="pt-[80px] md:pt-[145px]">
           <Switch>
             <Route exact strict path="/" component={Swap} />
+            <Route exact strict path="/insight" component={Insight} />
             <Route exact strict path="/tokens" component={Tokens} />
             <Route exact strict path="/pools" component={Pools} />
             <Route exact strict path="/portfolio" component={Portfolio} />
