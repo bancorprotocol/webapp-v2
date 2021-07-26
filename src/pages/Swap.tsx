@@ -1,3 +1,4 @@
+import { SwapLimitTable } from 'elements/swapLimit/SwapLimitTable';
 import { SwapWidget } from 'elements/swapWidget/SwapWidget';
 import { useState } from 'react';
 
@@ -7,7 +8,7 @@ export const Swap = () => {
   return (
     <>
       <SwapWidget isLimit={isLimit} setIsLimit={setIsLimit} />
-      {/* {isLimit ? <SwapLimitTable /> : ''} */}
+      {isLimit ? <SwapLimitTable /> : ''}
     </>
   );
 };
