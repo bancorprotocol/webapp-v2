@@ -121,7 +121,9 @@ export const InsightRow = ({
         <div className="h-full col-span-3 gap-8 grid grid-cols-3">
           {rows.map((card) => (
             <div className="md:border rounded-15 p-8 h-full border-gray-200 col-span-3 md:col-span-1 flex flex-col justify-between">
-              <div className="font-bold">{card.content}</div>
+              <div className="font-bold text-center md:text-left">
+                {card.content}
+              </div>
               <div className="relative pt-1 ">
                 <div className="flex mb-2 items-center justify-between">
                   {card.parsedPercentages.map((card) => (
