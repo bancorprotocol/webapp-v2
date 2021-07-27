@@ -4,7 +4,7 @@ import BigNumber from 'bignumber.js';
 import { InputField } from 'components/inputField/InputField';
 import { TokenInputField } from 'components/tokenInputField/TokenInputField';
 import { ModalDuration } from 'elements/modalDuration/modalDuration';
-import { TokenListItem } from 'services/observables/tokens';
+import { Token } from 'services/observables/tokens';
 import { ReactComponent as IconSync } from 'assets/icons/sync.svg';
 import {
   calculatePercentageChange,
@@ -12,8 +12,7 @@ import {
 } from 'utils/pureFunctions';
 import { useInterval } from 'hooks/useInterval';
 import { getRateAndPriceImapct } from 'services/web3/swap/market';
-import usePrevious from 'hooks/usePrevious';
-import { swapLimit } from 'services/api/keeperDao';
+import { KeeprDaoToken, swapLimit } from 'services/api/keeperDao';
 import {
   addNotification,
   NotificationType,
@@ -35,9 +34,9 @@ enum Field {
 }
 
 interface SwapLimitProps {
-  fromToken: TokenListItem;
+  fromToken: Token;
   setFromToken: Function;
-  toToken: TokenListItem | null;
+  toToken: Token | null;
   setToToken: Function;
   switchTokens: Function;
 }
@@ -57,20 +56,21 @@ export const SwapLimit = ({
   const [fromAmountUsd, setFromAmountUsd] = useState('');
   const [rate, setRate] = useState('');
   const [marketRate, setMarketRate] = useState(-1);
-  const prevMarket = usePrevious(marketRate);
   const [percentage, setPercentage] = useState('');
   const [selPercentage, setSelPercentage] = useState(1);
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [showEthModal, setShowEthModal] = useState(false);
   const [disableSwap, setDisableSwap] = useState(false);
   const [fromError, setFromError] = useState('');
+  const [rateWarning, setRateWarning] = useState({ type: '', msg: '' });
   const [duration, setDuration] = useState(
     dayjs.duration({ days: 7, hours: 0, minutes: 0 })
   );
   const previousField = useRef<Field>();
   const lastChangedField = useRef<Field>();
-  const tokens = useAppSelector<TokenListItem[]>(
-    (state) => state.bancor.tokens
+  const tokens = useAppSelector<Token[]>((state) => state.bancor.tokens);
+  const keeperDaoTokens = useAppSelector<KeeprDaoToken[]>(
+    (state) => state.bancor.keeperDaoTokens
   );
 
   const percentages = useMemo(() => [1, 3, 5], []);
@@ -144,12 +144,30 @@ export const SwapLimit = ({
           else calcFrom(to, rate);
           break;
         case Field.rate:
+          const isTooHigh = new BigNumber(rate).lt(marketRate);
+          const isTooLow = new BigNumber(marketRate).times(1.2).lt(rate);
+          if (isTooHigh) {
+            setRateWarning({
+              type: 'error',
+              msg: 'Pay attention! The rate is lower than market rate, you can get a better rate on market swap',
+            });
+          } else if (isTooLow) {
+            setRateWarning({
+              type: 'warning',
+              msg: 'Pay attention! The rate is too high above market rate and will likely not be fulfilled',
+            });
+          } else {
+            setRateWarning({
+              type: '',
+              msg: '',
+            });
+          }
           if (previousField.current === Field.from) calcTo(from, rate);
           else calcFrom(to, rate);
           break;
       }
     },
-    [calcRate, calcTo, calcFrom]
+    [calcRate, calcTo, calcFrom, marketRate]
   );
 
   const calculateRateByMarket = useCallback(
@@ -169,19 +187,19 @@ export const SwapLimit = ({
     if (!fromToken || !toToken) return;
     if (toToken.address === ethToken) return;
 
-    const res = await getRateAndPriceImapct(fromToken, toToken, '1');
+    const res = await getRateAndPriceImapct(fromToken, toToken, '1', true);
     setMarketRate(Number(res.rate));
   }, [fromToken, toToken]);
 
   useEffect(() => {
-    if (prevMarket === -1)
-      calculateRateByMarket(marketRate, selPercentage, percentage);
+    calculateRateByMarket(marketRate, selPercentage, percentage);
   }, [
     calculateRateByMarket,
     marketRate,
     selPercentage,
     percentage,
-    prevMarket,
+    fromToken,
+    toToken,
   ]);
 
   useEffect(() => {
@@ -195,7 +213,7 @@ export const SwapLimit = ({
   }, [fetchMarketRate, fromToken, toToken, setToToken, tokens]);
 
   //Check if approval is required
-  const checkApproval = async (token: TokenListItem) => {
+  const checkApproval = async (token: Token) => {
     try {
       const isApprovalReq = await getNetworkContractApproval(token, fromAmount);
       if (isApprovalReq) setShowApproveModal(true);
@@ -256,6 +274,12 @@ export const SwapLimit = ({
     else setFromError('');
   }, [fromAmount, fromToken]);
 
+  const handleRateInput = (val: string) => {
+    setRate(val);
+    calculatePercentageByRate(marketRate, val);
+    handleFieldChanged(Field.rate, fromAmount, toAmount, val);
+  };
+
   return (
     <div>
       <div className="px-20">
@@ -284,6 +308,7 @@ export const SwapLimit = ({
               : []
           }
           errorMsg={fromError}
+          includedTokens={keeperDaoTokens.map((x) => x.address)}
         />
       </div>
 
@@ -319,6 +344,7 @@ export const SwapLimit = ({
                   ]
                 : []
             }
+            includedTokens={keeperDaoTokens.map((x) => x.address)}
           />
           {toToken && (
             <>
@@ -331,19 +357,21 @@ export const SwapLimit = ({
                   }`}
                 </div>
               </div>
-              <div className="flex justify-between items-center mb-15">
+              <div className="flex justify-between items-center">
                 <div className="whitespace-nowrap text-20 min-w-[135px]">{`1 ${fromToken?.symbol} =`}</div>
-                <InputField
-                  format
-                  input={rate}
-                  onChange={(val: string) => {
-                    setRate(val);
-                    calculatePercentageByRate(marketRate, val);
-                    handleFieldChanged(Field.rate, fromAmount, toAmount, val);
-                  }}
-                />
+                <InputField format input={rate} onChange={handleRateInput} />
               </div>
-              <div className="flex justify-end space-x-8">
+              {rateWarning.msg && marketRate !== -1 && (
+                <div
+                  className={`mt-10 text-center ${classNameGenerator({
+                    'text-error': rateWarning.type === 'error',
+                    'text-warning': rateWarning.type === 'warning',
+                  })}`}
+                >
+                  {rateWarning.msg}
+                </div>
+              )}
+              <div className="flex justify-end space-x-8 mt-15">
                 {percentages.map((slip, index) => (
                   <button
                     key={'slippage' + slip}

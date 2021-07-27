@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react';
 import { classNameGenerator, sanitizeNumberInput } from 'utils/pureFunctions';
 import { SearchableTokenList } from 'components/searchableTokenList/SearchableTokenList';
-import { getTokenLogoURI, TokenListItem } from 'services/observables/tokens';
+import { getTokenLogoURI, Token } from 'services/observables/tokens';
 import { ReactComponent as IconChevronDown } from 'assets/icons/chevronDown.svg';
 import 'components/tokenInputField/TokenInputField.css';
 import 'components/inputField/InputField.css';
@@ -20,14 +20,15 @@ interface TokenInputFieldProps {
   amountUsd: string;
   setAmountUsd: Function;
   onChange?: Function;
-  token: TokenListItem | null;
+  token: Token | null;
   setToken: Function;
   debounce?: Function;
   startEmpty?: boolean;
-  excludedTokens?: string[];
   errorMsg?: string;
   usdSlippage?: number;
   dataCy?: string;
+  excludedTokens?: string[];
+  includedTokens?: string[];
 }
 
 export const TokenInputField = ({
@@ -45,9 +46,10 @@ export const TokenInputField = ({
   disabled,
   debounce,
   startEmpty,
-  excludedTokens = [],
   errorMsg,
   usdSlippage,
+  excludedTokens = [],
+  includedTokens = [],
 }: TokenInputFieldProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showSelectToken, setSelectToken] = useState(!!startEmpty);
@@ -99,11 +101,19 @@ export const TokenInputField = ({
     const amount = toggle ? tokenAmount : usdAmount;
 
     if ((input || amountUsd) && token) return `${prefix}${amount}`;
-    else return `${prefix}0`;
+    else return `${prefix}${toggle ? '' : '$'}0`;
   };
 
   const setMaxAmount = () => {
-    balance && balanceUsd && onInputChange(toggle ? balanceUsd : balance);
+    if (balance && balanceUsd && token) {
+      if (token.symbol === 'ETH') {
+        const reducedBalance = new BigNumber(balance).minus(0.01).toString();
+        const reducedUsdBalance = new BigNumber(reducedBalance)
+          .times(token.usdPrice!)
+          .toString();
+        onInputChange(toggle ? reducedUsdBalance : reducedBalance);
+      } else onInputChange(toggle ? balanceUsd : balance);
+    }
   };
 
   const inputFieldStyles = `token-input-field ${classNameGenerator({
@@ -189,21 +199,22 @@ export const TokenInputField = ({
         <button
           data-cy="selectTokenButton"
           onClick={() => (selectable ? setIsOpen(true) : {})}
-          className="flex items-center text-primary uppercase font-semibold text-20 mt-10 mb-30 py-5"
+          className="flex items-center text-primary font-medium text-20 mt-10 mb-30 py-5"
         >
-          Select a Token
+          Select a token
           <IconChevronDown className="w-[10px] h-[6px] ml-10" />
         </button>
       )}
 
       <SearchableTokenList
-        onClick={(token: TokenListItem) => {
+        onClick={(token: Token) => {
           setToken(token);
           setSelectToken(false);
         }}
         isOpen={isOpen}
         setIsOpen={setIsOpen}
         excludedTokens={excludedTokens}
+        includedTokens={includedTokens}
       />
     </div>
   );
