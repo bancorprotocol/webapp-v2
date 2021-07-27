@@ -1,5 +1,4 @@
 import { pick, toPairs } from 'lodash';
-import { capitaliseFirstChar } from 'utils/helperFunctions';
 import { InsightToken } from './Insight';
 import { Needle } from './Needle';
 
