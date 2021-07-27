@@ -9,6 +9,8 @@ import {
   setTokenList,
   setTokenLists,
 } from 'redux/bancor/bancor';
+import { setFromToken, setToToken } from 'redux/intoTheBlock/intoTheBlock';
+import { fromTokenIntoTheBlock$, toTokenIntoTheBlock$ } from './intoTheBlock';
 
 export const loadSwapData = (dispatch: any) => {
   tokenLists$.subscribe((tokenLists) => {
@@ -25,6 +27,9 @@ export const loadSwapData = (dispatch: any) => {
   keeperDaoTokens$.subscribe((keeperDaoTokens) => {
     setKeeperDaoTokens(keeperDaoTokens);
   });
+
+  fromTokenIntoTheBlock$.subscribe((token) => dispatch(setFromToken(token)));
+  toTokenIntoTheBlock$.subscribe((token) => dispatch(setToToken(token)));
 };
 
 const selected_lists = 'selected_list_ids';

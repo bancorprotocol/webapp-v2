@@ -1,10 +1,5 @@
+import { InsightToken } from './Insight';
 import { Needle } from './Needle';
-
-const Card = (text: string) => (
-  <div>
-    <div>{text}</div>
-  </div>
-);
 
 enum Colour {
   Green,
@@ -60,13 +55,7 @@ const matchColour = (colour: Colour): string => {
   }
 };
 
-export const InsightRow = ({
-  tokenSymbol,
-  imageUri,
-}: {
-  tokenSymbol: string;
-  imageUri: string;
-}) => {
+export const InsightRow = ({ token }: { token: InsightToken }) => {
   const rows = cards.map((colour) => ({
     content: colour.label,
     parsedPercentages: colour.percentages.map((percent) => ({
@@ -113,9 +102,11 @@ export const InsightRow = ({
       <div className="col-span-9 md:col-span-6 grid grid-cols-3">
         <div className="flex invisible md:visible col-span-6">
           <div className="w-44">
-            <img src={imageUri} alt="Token Logo" />
+            <img src={token.image} alt="Token Logo" />
           </div>
-          <div className="text-2xl bold align-middle text-center">BNT</div>
+          <div className="text-2xl bold align-middle text-center">
+            {token.symbol}
+          </div>
           <div className="mx-8 align-middle text-center">Price $75</div>
         </div>
         <div className="h-full col-span-3 gap-8 grid grid-cols-3">

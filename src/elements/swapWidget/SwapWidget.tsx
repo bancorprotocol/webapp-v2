@@ -11,7 +11,9 @@ import {
   fetchFromToken,
   fetchToToken,
 } from 'services/observables/intoTheBlock';
-import { Insight } from 'elements/insight/Insight';
+import { Insight, InsightToken } from 'elements/insight/Insight';
+import { IntoTheBlock } from 'services/api/intoTheBlock';
+import { zip } from 'lodash';
 
 export const Toggle = createContext(false);
 interface SwapWidgetProps {
@@ -21,10 +23,30 @@ interface SwapWidgetProps {
 
 export const SwapWidget = ({ isLimit, setIsLimit }: SwapWidgetProps) => {
   const tokens = useAppSelector<Token[]>((state) => state.bancor.tokens);
+  const fromTokenIntoBlock = useAppSelector<IntoTheBlock>(
+    (state) => state.intoTheBlock.fromToken
+  );
+  const toTokenIntoBlock = useAppSelector<IntoTheBlock>(
+    (state) => state.intoTheBlock.toToken
+  );
 
   const [fromToken, setFromToken] = useState(tokens[0]);
   const [toToken, setToToken] = useState<Token | null>(null);
   const [toggle, setToggle] = useState(false);
+
+  const insightTokens = zip(
+    [fromTokenIntoBlock, toTokenIntoBlock],
+    [fromToken, toToken]
+  )
+    .filter(([intoTheBlock, api]) => api && intoTheBlock && api.logoURI)
+    .map(
+      ([intoTheBlock, api]): InsightToken =>
+        ({
+          ...intoTheBlock,
+          price: Number(api?.usdPrice) || 0,
+          image: api?.logoURI || '',
+        } as InsightToken)
+    );
 
   const dispatch = useDispatch();
 
@@ -108,7 +130,7 @@ export const SwapWidget = ({ isLimit, setIsLimit }: SwapWidgetProps) => {
       ) : (
         ''
       )}
-      <Insight tokens={[]} />
+      <Insight tokens={insightTokens} />
     </Toggle.Provider>
   );
 };
