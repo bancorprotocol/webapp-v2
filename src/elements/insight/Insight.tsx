@@ -2,9 +2,9 @@ import { InsightRow } from './InsightRow';
 import { ReactComponent as IconLightbulb } from 'assets/icons/lightbulb.svg';
 import { ReactComponent as IconIntotheblock } from 'assets/icons/intotheblock.svg';
 
-export const Insight = () => {
+export const Insight = ({ tokens }: { tokens: any[] }) => {
   return (
-    <div className="widget-large  mx-auto">
+    <div className="widget-large mx-auto">
       <div className="flex justify-between p-10">
         <div className="text-2xl  font-semibold flex gap-10">
           <IconLightbulb /> Insights

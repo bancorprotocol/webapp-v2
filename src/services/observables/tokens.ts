@@ -15,7 +15,9 @@ import {
   ethToken,
 } from 'services/web3/config';
 import { mapIgnoreThrown } from 'utils/pureFunctions';
-import { fetchKeeperDaoTokens } from 'services/api/keeperDao';
+import { KeeprDaoToken } from 'services/api/keeperDao';
+
+const baseUrl: string = 'https://hidingbook.keeperdao.com/api/v1';
 
 export interface TokenList {
   name: string;
@@ -158,6 +160,16 @@ export const tokens$ = combineLatest([
   }),
   shareReplay(1)
 );
+
+export const fetchKeeperDaoTokens = async (): Promise<KeeprDaoToken[]> => {
+  try {
+    const res = await axios.get(`${baseUrl}/tokenList`);
+    return res.data.result.tokens;
+  } catch (error) {
+    console.error('Failed fetching keeperDao Tokens: ', error);
+    return [];
+  }
+};
 
 export const keeperDaoTokens$ = from(fetchKeeperDaoTokens()).pipe(
   shareReplay(1)

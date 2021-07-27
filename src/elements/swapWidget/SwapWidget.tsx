@@ -7,6 +7,11 @@ import { useDispatch } from 'react-redux';
 import { Token } from 'services/observables/tokens';
 import { useAppSelector } from 'redux/index';
 import { ethToken, wethToken } from 'services/web3/config';
+import {
+  fetchFromToken,
+  fetchToToken,
+} from 'services/observables/intoTheBlock';
+import { Insight } from 'elements/insight/Insight';
 
 export const Toggle = createContext(false);
 interface SwapWidgetProps {
@@ -26,6 +31,18 @@ export const SwapWidget = ({ isLimit, setIsLimit }: SwapWidgetProps) => {
   useEffect(() => {
     loadSwapData(dispatch);
   }, [dispatch]);
+
+  useEffect(() => {
+    if (fromToken) {
+      fetchFromToken(fromToken.symbol);
+    }
+  }, [fromToken]);
+
+  useEffect(() => {
+    if (toToken) {
+      fetchToToken(toToken.symbol);
+    }
+  }, [toToken]);
 
   useEffect(() => {
     const findSetToken = (token: Token) => {
@@ -91,6 +108,7 @@ export const SwapWidget = ({ isLimit, setIsLimit }: SwapWidgetProps) => {
       ) : (
         ''
       )}
+      <Insight tokens={[]} />
     </Toggle.Provider>
   );
 };

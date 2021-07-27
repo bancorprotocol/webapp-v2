@@ -43,6 +43,7 @@ export interface IntoTheBlock {
   inOutOfTheMoney: InOutOfTheMoney;
   concentration: number;
   byTimeHeldComposition: ByTimeHeldComposition;
+  symbol: string;
 }
 
 axios.defaults.headers.common = {
@@ -63,6 +64,7 @@ export const intoTheBlockByToken = async (
     const sumTimeHeld = timeHeld.hodler + timeHeld.cruiser + timeHeld.trader;
     return {
       summary: signal.data.summary,
+      symbol,
       inOutOfTheMoney: {
         in: inOut.in / sumInOut,
         between: inOut.between / sumInOut,
