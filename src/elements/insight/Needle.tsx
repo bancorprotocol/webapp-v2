@@ -1,5 +1,6 @@
-export const Needle = () => {
-  const rotation = 150;
+export const Needle = ({ percent }: { percent: number }) => {
+  const rotation = percent * 180;
+
   const gradientColour =
     rotation > 110 ? 'palegreen' : rotation > 70 ? 'grey' : 'red';
 

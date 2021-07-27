@@ -1,4 +1,5 @@
 import { pick, toPairs } from 'lodash';
+import { prettifyNumber } from 'utils/helperFunctions';
 import { InsightToken } from './Insight';
 import { Needle } from './Needle';
 
@@ -74,19 +75,20 @@ export const InsightRow = ({ token }: { token: InsightToken }) => {
     })),
   }));
 
-  const title = (
-    toPairs(pick(token.summary, ['bullish', 'bearish', 'neutral'])).sort(
-      ([, a], [, b]) => Number(b) - Number(a)
-    )[0][0] as string
-  ).toUpperCase();
+  const winning = toPairs(
+    pick(token.summary, ['bullish', 'bearish', 'neutral'])
+  ).sort(([, a], [, b]) => Number(b) - Number(a))[0];
 
-  console.log(title, 'was title');
+  const title = (winning[0] as string).toUpperCase();
+
+  const needlePercent =
+    title === 'BEARISH' ? 0.3 : title === 'BULLISH' ? 0.8 : 0.5;
 
   return (
     <div className="grid grid-cols-9 justify-between py-24 px-4 gap-4">
       <div className="col-span-9 md:col-span-3">
         <div className="">
-          <Needle />
+          <Needle percent={needlePercent} />
         </div>
         <div className="text-center font-bold text-2xl">{title}</div>
         <div className="overflow-hidden h-2 mb-4 text-xs flex rounded "></div>
@@ -125,7 +127,9 @@ export const InsightRow = ({ token }: { token: InsightToken }) => {
           <div className="text-2xl bold align-middle text-center">
             {token.symbol}
           </div>
-          <div className="mx-8 align-middle text-center">Price $75</div>
+          <div className="mx-8 align-middle text-center">
+            Price {prettifyNumber(token.price, true)}
+          </div>
         </div>
         <div className="h-full col-span-3 gap-8 grid grid-cols-3">
           {rows.map((card) => (
