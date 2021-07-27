@@ -31,8 +31,6 @@ const matchColour = (colour: Colour): string => {
 };
 
 export const InsightRow = ({ token }: { token: InsightToken }) => {
-  console.log(token, 'is the token');
-
   const remainingConcentration = 1 - token.concentration;
 
   const cards: { label: string; percentages: Progress[] }[] = [
