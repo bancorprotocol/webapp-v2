@@ -1,3 +1,5 @@
+import { pick, toPairs } from 'lodash';
+import { capitaliseFirstChar } from 'utils/helperFunctions';
 import { InsightToken } from './Insight';
 import { Needle } from './Needle';
 
@@ -12,33 +14,6 @@ interface Progress {
   colour: Colour;
   decPercent: number;
 }
-
-const cards: { label: string; percentages: Progress[] }[] = [
-  {
-    label: 'Holders making money at the current price',
-    percentages: [
-      { colour: Colour.Green, decPercent: 0.84 },
-      { colour: Colour.Grey, decPercent: 0.17 },
-      { colour: Colour.Red, decPercent: 0.09 },
-    ],
-  },
-  {
-    label: 'Concentration by large holders',
-    percentages: [
-      { colour: Colour.Green, decPercent: 0.84 },
-      { colour: Colour.Grey, decPercent: 0.17 },
-      { colour: Colour.Red, decPercent: 0.09 },
-    ],
-  },
-  {
-    label: 'Holders composition by time held',
-    percentages: [
-      { colour: Colour.Green, decPercent: 0.84 },
-      { colour: Colour.Grey, decPercent: 0.17 },
-      { colour: Colour.Red, decPercent: 0.09 },
-    ],
-  },
-];
 
 const matchColour = (colour: Colour): string => {
   switch (colour) {
@@ -56,6 +31,42 @@ const matchColour = (colour: Colour): string => {
 };
 
 export const InsightRow = ({ token }: { token: InsightToken }) => {
+  console.log(token, 'is the token');
+
+  const remainingConcentration = 1 - token.concentration;
+
+  const cards: { label: string; percentages: Progress[] }[] = [
+    {
+      label: 'Holders making money at the current price',
+      percentages: [
+        { colour: Colour.Green, decPercent: token.inOutOfTheMoney.in },
+        { colour: Colour.Grey, decPercent: token.inOutOfTheMoney.between },
+        { colour: Colour.Red, decPercent: token.inOutOfTheMoney.out },
+      ],
+    },
+    {
+      label: 'Concentration by large holders',
+      percentages: [
+        { colour: Colour.Blue, decPercent: token.concentration },
+        { colour: Colour.Grey, decPercent: remainingConcentration },
+      ],
+    },
+    {
+      label: 'Holders composition by time held',
+      percentages: [
+        {
+          colour: Colour.Blue,
+          decPercent: token.byTimeHeldComposition.cruiser,
+        },
+        { colour: Colour.Red, decPercent: token.byTimeHeldComposition.trader },
+        {
+          colour: Colour.Green,
+          decPercent: token.byTimeHeldComposition.hodler,
+        },
+      ],
+    },
+  ];
+
   const rows = cards.map((colour) => ({
     content: colour.label,
     parsedPercentages: colour.percentages.map((percent) => ({
@@ -64,18 +75,26 @@ export const InsightRow = ({ token }: { token: InsightToken }) => {
     })),
   }));
 
+  const title = (
+    toPairs(pick(token.summary, ['bullish', 'bearish', 'neutral'])).sort(
+      ([, a], [, b]) => Number(b) - Number(a)
+    )[0][0] as string
+  ).toUpperCase();
+
+  console.log(title, 'was title');
+
   return (
     <div className="grid grid-cols-9 justify-between py-24 px-4 gap-4">
       <div className="col-span-9 md:col-span-3">
         <div className="">
           <Needle />
         </div>
-        <div className="text-center font-bold text-2xl">BULLISH</div>
+        <div className="text-center font-bold text-2xl">{title}</div>
         <div className="overflow-hidden h-2 mb-4 text-xs flex rounded "></div>
         <div className="flex px-5 justify-between text-center">
           <div>
             <div className="font-bold text-2xl sm:text-3xl md:text-base text-red-500">
-              1
+              {token.summary.bearish}
             </div>
             <div className="font-bold text-2xl sm:text-3xl md:text-base">
               Bearish
@@ -83,7 +102,7 @@ export const InsightRow = ({ token }: { token: InsightToken }) => {
           </div>
           <div>
             <div className="font-bold text-2xl sm:text-3xl md:text-base text-gray-300">
-              1
+              {token.summary.neutral}
             </div>
             <div className="font-bold text-2xl sm:text-3xl md:text-base">
               Neutral
@@ -91,7 +110,7 @@ export const InsightRow = ({ token }: { token: InsightToken }) => {
           </div>
           <div>
             <div className="font-bold text-2xl sm:text-3xl md:text-base text-green-500 ">
-              2
+              {token.summary.bullish}
             </div>
             <div className="font-bold text-2xl sm:text-3xl md:text-base">
               Bullish
