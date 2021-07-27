@@ -1,5 +1,5 @@
 import { bancorNetwork$ } from 'services/observables/contracts';
-import { TokenListItem } from 'services/observables/tokens';
+import { Token } from 'services/observables/tokens';
 import { expandToken, shrinkToken, splitArrayByVal } from 'utils/pureFunctions';
 import { resolveTxOnConfirmation } from 'services/web3';
 import { web3, writeWeb3 } from 'services/web3/contracts';
@@ -23,41 +23,53 @@ import { currentNetwork$ } from 'services/observables/network';
 const oneMillion = new BigNumber(1000000);
 
 export const getRateAndPriceImapct = async (
-  fromToken: TokenListItem,
-  toToken: TokenListItem,
-  amount: string
+  fromToken: Token,
+  toToken: Token,
+  amount: string,
+  skipPriceImpact?: boolean
 ) => {
-  const networkContractAddress = await bancorNetwork$.pipe(take(1)).toPromise();
+  try {
+    const networkContractAddress = await bancorNetwork$
+      .pipe(take(1))
+      .toPromise();
 
-  const path = await conversionPath({
-    from: fromToken.address === wethToken ? ethToken : fromToken.address,
-    to: toToken.address === wethToken ? ethToken : toToken.address,
-    networkContractAddress,
-    web3,
-  });
+    const from = fromToken.address === wethToken ? ethToken : fromToken.address;
+    const to = toToken.address === wethToken ? ethToken : toToken.address;
 
-  const fromAmountWei = expandToken(amount, fromToken.decimals);
-  const toAmountWei = await getRateByPath({
-    networkContractAddress,
-    amount: fromAmountWei,
-    path,
-    web3,
-  });
-  const rate = shrinkToken(toAmountWei, toToken.decimals);
+    const path = await conversionPath({
+      from,
+      to,
+      networkContractAddress,
+      web3,
+    });
 
-  const priceImpact = new BigNumber(1)
-    .minus(
-      new BigNumber(rate)
-        .div(amount)
-        .div(await calculateSpotPrice(fromToken.address, toToken.address))
-    )
-    .times(100)
-    .toFixed(4);
+    const fromAmountWei = expandToken(amount, fromToken.decimals);
+    const toAmountWei = await getRateByPath({
+      networkContractAddress,
+      amount: fromAmountWei,
+      path,
+      web3,
+    });
+    const rate = shrinkToken(toAmountWei, toToken.decimals);
 
-  return {
-    rate,
-    priceImpact,
-  };
+    if (skipPriceImpact) return { rate, priceImpact: '0.0000' };
+
+    const priceImpactNum = new BigNumber(1)
+      .minus(
+        new BigNumber(rate).div(amount).div(await calculateSpotPrice(from, to))
+      )
+      .times(100);
+
+    return {
+      rate,
+      priceImpact: isNaN(priceImpactNum.toNumber())
+        ? '0.0000'
+        : priceImpactNum.toFixed(4),
+    };
+  } catch (error) {
+    console.error('Failed fetching rate and price impact: ', error);
+    return { rate: '0', priceImpact: '0.0000' };
+  }
 };
 
 export const swap = async ({
@@ -70,8 +82,8 @@ export const swap = async ({
   onConfirmation,
 }: {
   slippageTolerance: number;
-  fromToken: TokenListItem;
-  toToken: TokenListItem;
+  fromToken: Token;
+  toToken: Token;
   fromAmount: string;
   toAmount: string;
   user: string;
