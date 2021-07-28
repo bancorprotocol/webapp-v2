@@ -1,6 +1,6 @@
 import { TokenInputField } from 'components/tokenInputField/TokenInputField';
 import { useDebounce } from 'hooks/useDebounce';
-import { Token } from 'services/observables/tokens';
+import { Token, tokensRefreshReceiver$ } from 'services/observables/tokens';
 import { useEffect, useState } from 'react';
 import { getRateAndPriceImapct, swap } from 'services/web3/swap/market';
 import { ReactComponent as IconSync } from 'assets/icons/sync.svg';
@@ -18,6 +18,7 @@ import BigNumber from 'bignumber.js';
 import { openWalletModal } from 'redux/user/user';
 import { ModalApprove } from 'elements/modalApprove/modalApprove';
 import { sanitizeNumberInput } from 'utils/pureFunctions';
+import wait from 'waait';
 
 interface SwapMarketProps {
   fromToken: Token;
@@ -172,6 +173,9 @@ export const SwapMarket = ({
         toAmount,
         user: account,
       });
+
+      tokensRefreshReceiver$.next(true);
+      wait(5000).then(() => tokensRefreshReceiver$.next(true));
 
       dispatch(
         addNotification({

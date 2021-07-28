@@ -32,6 +32,7 @@ import {
 import { useAppSelector } from 'redux/index';
 import { web3 } from 'services/web3/contracts';
 import { provider } from 'services/web3/wallet/connectors';
+import { tokensRefreshReceiver$ } from 'services/observables/tokens';
 
 export const App = () => {
   const dispatch = useDispatch();
@@ -75,6 +76,7 @@ export const App = () => {
   useEffect(() => {
     (async () => {
       const chainID = await web3.eth.net.getId();
+      tokensRefreshReceiver$.next(true);
       web3.setProvider(provider(chainID));
       currentNetworkReceiver$.next(chainID);
     })();

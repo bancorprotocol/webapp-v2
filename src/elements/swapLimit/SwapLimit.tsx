@@ -4,7 +4,7 @@ import BigNumber from 'bignumber.js';
 import { InputField } from 'components/inputField/InputField';
 import { TokenInputField } from 'components/tokenInputField/TokenInputField';
 import { ModalDuration } from 'elements/modalDuration/modalDuration';
-import { Token } from 'services/observables/tokens';
+import { Token, tokensRefreshReceiver$ } from 'services/observables/tokens';
 import { ReactComponent as IconSync } from 'assets/icons/sync.svg';
 import {
   calculatePercentageChange,
@@ -26,6 +26,7 @@ import { ModalApprove } from 'elements/modalApprove/modalApprove';
 import { getNetworkContractApproval } from 'services/web3/approval';
 import { Modal } from 'components/modal/Modal';
 import { prettifyNumber } from 'utils/helperFunctions';
+import wait from 'waait';
 
 enum Field {
   from,
@@ -253,6 +254,9 @@ export const SwapLimit = ({
       duration,
       checkApproval
     );
+
+    tokensRefreshReceiver$.next(true);
+    wait(5000).then(() => tokensRefreshReceiver$.next(true));
 
     if (notification) dispatch(addNotification(notification));
   };

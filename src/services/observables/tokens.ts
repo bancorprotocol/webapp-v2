@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { BehaviorSubject, combineLatest, from } from 'rxjs';
+import { BehaviorSubject, combineLatest, from, Subject } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import { EthNetworks } from 'services/web3/types';
 import { toChecksumAddress } from 'web3-utils';
@@ -103,11 +103,14 @@ const tokenListMerged$ = combineLatest([
   shareReplay()
 );
 
+export const tokensRefreshReceiver$ = new Subject<true>();
+
 export const tokens$ = combineLatest([
   tokenListMerged$,
   apiTokens$,
   user$,
   currentNetwork$,
+  tokensRefreshReceiver$,
 ]).pipe(
   switchMapIgnoreThrow(async ([tokenList, apiTokens, user, currentNetwork]) => {
     const newApiTokens = [...apiTokens, buildWethToken(apiTokens)].map((x) => ({
