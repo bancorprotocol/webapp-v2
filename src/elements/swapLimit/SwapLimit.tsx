@@ -59,6 +59,7 @@ export const SwapLimit = ({
   const [percentage, setPercentage] = useState('');
   const [selPercentage, setSelPercentage] = useState(1);
   const [showApproveModal, setShowApproveModal] = useState(false);
+  const [approveToken, setApproveToken] = useState<Token>();
   const [showEthModal, setShowEthModal] = useState(false);
   const [fromError, setFromError] = useState('');
   const [rateWarning, setRateWarning] = useState({ type: '', msg: '' });
@@ -215,14 +216,16 @@ export const SwapLimit = ({
   const checkApproval = async (token: Token) => {
     try {
       const isApprovalReq = await getNetworkContractApproval(token, fromAmount);
-      if (isApprovalReq) setShowApproveModal(true);
-      else await handleSwap(true);
+      if (isApprovalReq) {
+        setShowApproveModal(true);
+        setApproveToken(token);
+      } else await handleSwap(true);
     } catch (e) {
       dispatch(
         addNotification({
           type: NotificationType.error,
           title: 'Transaction Failed',
-          msg: `${fromToken.symbol} approval had failed. Please try again or contact support.`,
+          msg: `${token.symbol} approval had failed. Please try again or contact support.`,
         })
       );
     }
@@ -451,7 +454,7 @@ export const SwapLimit = ({
           isOpen={showApproveModal}
           setIsOpen={setShowApproveModal}
           amount={fromAmount}
-          fromToken={fromToken}
+          fromToken={approveToken}
           handleApproved={() =>
             handleSwap(true, fromToken.address === ethToken)
           }

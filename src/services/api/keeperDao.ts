@@ -43,7 +43,7 @@ export const swapLimit = async (
     if (fromIsEth) {
       try {
         const txHash = await depositWeth(from, user);
-        checkApproval({ ...fromToken, address: wethToken });
+        checkApproval({ ...fromToken, symbol: 'WETH', address: wethToken });
         return {
           type: NotificationType.pending,
           title: 'Pending Confirmation',
