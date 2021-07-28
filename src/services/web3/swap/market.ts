@@ -1,5 +1,5 @@
 import { bancorNetwork$ } from 'services/observables/contracts';
-import { Token } from 'services/observables/tokens';
+import { Token, tokensRefreshReceiver$ } from 'services/observables/tokens';
 import { expandToken, shrinkToken, splitArrayByVal } from 'utils/pureFunctions';
 import { resolveTxOnConfirmation } from 'services/web3';
 import { web3, writeWeb3 } from 'services/web3/contracts';
@@ -116,6 +116,8 @@ export const swap = async ({
     user,
     onConfirmation: () => {
       //RefreshBalances
+      tokensRefreshReceiver$.next(true);
+      setTimeout(() => tokensRefreshReceiver$.next(true), 4000);
       onConfirmation && onConfirmation();
     },
     resolveImmediately: true,

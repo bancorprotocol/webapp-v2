@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { BehaviorSubject, combineLatest, from, Subject } from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
+import { map, shareReplay, tap } from 'rxjs/operators';
 import { EthNetworks } from 'services/web3/types';
 import { toChecksumAddress } from 'web3-utils';
 import { apiTokens$ } from './pools';
@@ -105,12 +105,17 @@ const tokenListMerged$ = combineLatest([
 
 export const tokensRefreshReceiver$ = new Subject<true>();
 
+const tokenRefresh$ = tokensRefreshReceiver$.pipe(
+  tap((x) => console.log(x, 'was emiited from obs')),
+  shareReplay(1)
+);
+
 export const tokens$ = combineLatest([
   tokenListMerged$,
   apiTokens$,
   user$,
   currentNetwork$,
-  tokensRefreshReceiver$,
+  tokenRefresh$,
 ]).pipe(
   switchMapIgnoreThrow(async ([tokenList, apiTokens, user, currentNetwork]) => {
     const newApiTokens = [...apiTokens, buildWethToken(apiTokens)].map((x) => ({

@@ -1,5 +1,5 @@
 import { expandToken } from 'utils/pureFunctions';
-import { Token } from 'services/observables/tokens';
+import { Token, tokensRefreshReceiver$ } from 'services/observables/tokens';
 import { getTxOrigin, RfqOrderJson, sendOrders } from 'services/api/keeperDao';
 import { RfqOrder, SignatureType } from '@0x/protocol-utils';
 import { determineTxGas, resolveTxOnConfirmation } from 'services/web3/index';
@@ -31,6 +31,7 @@ export const depositWeth = async (amount: string, user: string) => {
     user,
     gas: estimatedGas * manualBuffer,
     resolveImmediately: true,
+    onConfirmation: () => tokensRefreshReceiver$.next(true),
   });
 
   return txHash;

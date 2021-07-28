@@ -63,6 +63,7 @@ export const resolveTxOnConfirmation = async ({
         }
       })
       .on('confirmation', (confirmationNumber: number) => {
+        // todo check conf number, is it 1 or should it be 0?
         if (confirmationNumber === 1) {
           if (onConfirmation) onConfirmation(txHash);
           resolve(txHash);
