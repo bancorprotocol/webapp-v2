@@ -79,8 +79,7 @@ export const InsightRow = ({ token }: { token: InsightToken }) => {
 
   const title = (winning[0] as string).toUpperCase();
 
-  const needlePercent =
-    title === 'BEARISH' ? 0.3 : title === 'BULLISH' ? 0.8 : 0.5;
+  const needlePercent = token.summary.score;
 
   return (
     <div className="grid grid-cols-9 justify-between py-24 px-4 gap-4">
