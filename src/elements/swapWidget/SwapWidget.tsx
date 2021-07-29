@@ -14,9 +14,11 @@ import {
 import { Insight, InsightToken } from 'elements/insight/Insight';
 import { IntoTheBlock } from 'services/api/intoTheBlock';
 import { zip } from 'lodash';
+import { setShowInsights } from 'redux/user/user';
 import { ReactComponent as IconLightbulb } from 'assets/icons/lightbulb.svg';
 
 export const Toggle = createContext(false);
+
 interface SwapWidgetProps {
   isLimit: boolean;
   setIsLimit: Function;
@@ -31,11 +33,13 @@ export const SwapWidget = ({ isLimit, setIsLimit }: SwapWidgetProps) => {
     (state) => state.intoTheBlock.toToken
   );
 
+  const insightsIsVisible = useAppSelector<boolean>(
+    (state) => state.user.showInsights
+  );
+
   const [fromToken, setFromToken] = useState(tokens[0]);
   const [toToken, setToToken] = useState<Token | null>(null);
   const [toggle, setToggle] = useState(false);
-
-  const [showInsights, setShowInsights] = useState(false);
 
   const insightTokens = zip(
     [fromTokenIntoBlock, toTokenIntoBlock],
@@ -99,6 +103,11 @@ export const SwapWidget = ({ isLimit, setIsLimit }: SwapWidgetProps) => {
     }
   };
 
+  const showInsights = (status: boolean) => {
+    localStorage.setItem('showInsights', JSON.stringify(status));
+    dispatch(setShowInsights(status));
+  };
+
   return (
     <Toggle.Provider value={toggle}>
       <div className="flex  w-[1215px] mx-auto space-x-20">
@@ -136,17 +145,14 @@ export const SwapWidget = ({ isLimit, setIsLimit }: SwapWidgetProps) => {
             ''
           )}
         </div>
-        {showInsights ? (
-          <Insight
-            tokens={insightTokens}
-            onClose={() => setShowInsights(false)}
-          />
+        {insightsIsVisible ? (
+          <Insight tokens={insightTokens} onClose={() => showInsights(false)} />
         ) : (
           <div>
             <div className="w-40 h-40 p-30 mx-4 rounded rounded-2xl bg-white ">
               <IconLightbulb
                 className="w-[28px] h-[23px] dark:text-grey-4"
-                onClick={() => setShowInsights(true)}
+                onClick={() => showInsights(true)}
               />
             </div>
           </div>
