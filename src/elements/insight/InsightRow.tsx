@@ -88,17 +88,28 @@ export const InsightRow = ({ token }: { token: InsightToken }) => {
 
   const needlePercent = token.summary.score;
 
+  const rotation = needlePercent * 180;
+
+  const titleColour =
+    rotation > 110
+      ? 'text-green-500'
+      : rotation > 70
+      ? 'text-grey-500'
+      : 'text-error';
+
   return (
-    <div className="grid grid-cols-9 justify-between py-24 px-4 gap-4">
-      <div className="col-span-9 md:col-span-3">
+    <div className="grid grid-cols-9 justify-between py-24 px-4 gap-x-40 border-t">
+      <div className="col-span-9 md:col-span-3 ">
         <div className="">
           <Needle percent={needlePercent} />
         </div>
-        <div className="text-center font-bold text-2xl">{title}</div>
+        <div className={`${titleColour} text-center font-semibold text-lg`}>
+          {title}
+        </div>
         <div className="overflow-hidden h-2 mb-4 text-xs flex rounded "></div>
         <div className="flex px-5 justify-between text-center">
           <div>
-            <div className="font-bold text-2xl sm:text-3xl md:text-base text-red-500">
+            <div className="font-bold text-2xl sm:text-3xl md:text-base text-error">
               {token.summary.bearish}
             </div>
             <div className="font-bold text-2xl sm:text-3xl md:text-base">
@@ -106,7 +117,7 @@ export const InsightRow = ({ token }: { token: InsightToken }) => {
             </div>
           </div>
           <div>
-            <div className="font-bold text-2xl sm:text-3xl md:text-base text-gray-300">
+            <div className="font-bold text-2xl sm:text-3xl md:text-base text-gray-500">
               {token.summary.neutral}
             </div>
             <div className="font-bold text-2xl sm:text-3xl md:text-base">
@@ -124,14 +135,16 @@ export const InsightRow = ({ token }: { token: InsightToken }) => {
         </div>
       </div>
       <div className="col-span-9 md:col-span-6 grid grid-cols-3">
-        <div className="flex invisible md:visible col-span-6">
-          <div className="w-44">
-            <img src={token.image} alt="Token Logo" />
+        <div className="flex invisible p-10 md:visible col-span-6">
+          <div className="ml-6 mr-10">
+            <img
+              className="rounded-full h-32 w-32 shadow-sm bg-grey-2"
+              src={token.image}
+              alt="Token Logo"
+            />
           </div>
-          <div className="text-2xl bold align-middle text-center">
-            {token.symbol}
-          </div>
-          <div className="mx-8 align-middle text-center">
+          <div className="text-2xl bold  text-center">{token.symbol}</div>
+          <div className="mx-12 text-xl pt-6  text-center">
             Price {prettifyNumber(token.price, true)}
           </div>
         </div>
@@ -139,9 +152,9 @@ export const InsightRow = ({ token }: { token: InsightToken }) => {
           {rows.map((card) => (
             <div
               key={card.content}
-              className="md:border rounded-15 p-8 h-full border-gray-200 col-span-3 md:col-span-1 flex flex-col justify-between"
+              className="md:border rounded-15 p-8 h-full font-medium border-gray-200 col-span-3 md:col-span-1 flex flex-col justify-between"
             >
-              <div className="font-bold text-center md:text-left">
+              <div className="text-sm text-center md:text-left">
                 {card.content}
               </div>
               <div className="relative pt-1 ">

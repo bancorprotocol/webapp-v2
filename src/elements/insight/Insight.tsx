@@ -10,11 +10,11 @@ export interface InsightToken extends IntoTheBlock {
 
 export const Insight = ({ tokens }: { tokens: InsightToken[] }) => (
   <div className="widget-large mx-auto">
-    <div className="flex justify-between p-10">
-      <div className="text-2xl  font-semibold flex gap-10">
+    <div className="flex justify-between p-10 ">
+      <div className="text-2xl p-10 font-semibold flex gap-10">
         <IconLightbulb /> Insights
       </div>
-      <div className="text-sm flex ">
+      <div className="text-sm p-16  flex">
         <IconIntotheblock className="mr-6" />
         <span className="font-bold">into</span>the
         <span className="font-bold">block</span>

@@ -98,39 +98,41 @@ export const SwapWidget = ({ isLimit, setIsLimit }: SwapWidgetProps) => {
 
   return (
     <Toggle.Provider value={toggle}>
-      <div className="flex justify-between w-[1200px] mx-auto space-x-20">
-        <div className="widget">
-          <SwapHeader
-            isLimit={isLimit}
-            setIsLimit={setIsLimit}
-            setToggle={setToggle}
-          />
-          <hr className="widget-separator" />
+      <div className="flex justify-between w-[1215px] mx-auto space-x-20">
+        <div>
+          <div className="widget">
+            <SwapHeader
+              isLimit={isLimit}
+              setIsLimit={setIsLimit}
+              setToggle={setToggle}
+            />
+            <hr className="widget-separator" />
+            {isLimit ? (
+              <SwapLimit
+                fromToken={fromToken}
+                setFromToken={setFromToken}
+                toToken={toToken}
+                setToToken={setToToken}
+                switchTokens={switchTokens}
+              />
+            ) : (
+              <SwapMarket
+                fromToken={fromToken}
+                setFromToken={setFromToken}
+                toToken={toToken}
+                setToToken={setToToken}
+                switchTokens={switchTokens}
+              />
+            )}
+          </div>
           {isLimit ? (
-            <SwapLimit
-              fromToken={fromToken}
-              setFromToken={setFromToken}
-              toToken={toToken}
-              setToToken={setToToken}
-              switchTokens={switchTokens}
-            />
+            <div className="text-center text-10 text-grey-4 mt-18">
+              Limit orders are powered by KeeperDAO
+            </div>
           ) : (
-            <SwapMarket
-              fromToken={fromToken}
-              setFromToken={setFromToken}
-              toToken={toToken}
-              setToToken={setToToken}
-              switchTokens={switchTokens}
-            />
+            ''
           )}
         </div>
-        {isLimit ? (
-          <div className="text-center text-10 text-grey-4 mt-18">
-            Limit orders are powered by KeeperDAO
-          </div>
-        ) : (
-          ''
-        )}
         <Insight tokens={insightTokens} />
       </div>
     </Toggle.Provider>
