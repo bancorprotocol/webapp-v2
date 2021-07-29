@@ -111,7 +111,7 @@ export const SearchableTokenList = ({
                         aria-hidden="true"
                         className={`${
                           isSelected ? 'translate-x-[20px]' : 'translate-x-0'
-                        }pointer-events-none inline-block h-[16px] w-[16px] rounded-full bg-white transform transition ease-in-out duration-300`}
+                        } pointer-events-none inline-block h-[16px] w-[16px] rounded-full bg-white transform transition ease-in-out duration-300`}
                       />
                     </Switch>
                   </div>
@@ -171,19 +171,22 @@ export const SearchableTokenList = ({
               })}
           </div>
           <hr className="border-grey-2 dark:border-blue-1" />
-          <div className="flex flex-col justify-center items-center h-[59px]">
+          <div className="flex justify-center items-center h-[59px]">
             <button
-              onClick={() => setManage(true)}
+              onClick={() => {
+                setUserLists(getLSTokenList());
+                setManage(true);
+              }}
               className="text-primary font-semibold"
             >
-              <div className="flex">
-                <IconEdit className="w-[18px] mr-4" />
+              <span className="flex justify-center items center">
+                <IconEdit className="w-[18px] h-[18px] mr-4" />
                 Manage Token Lists
-              </div>
+              </span>
+              <span className="text-grey-3 text-12 font-medium">
+                Only supported tokens will be displayed
+              </span>
             </button>
-            <div className="text-grey-3 text-12 font-medium">
-              Only supported tokens will be displayed
-            </div>
           </div>
         </>
       )}

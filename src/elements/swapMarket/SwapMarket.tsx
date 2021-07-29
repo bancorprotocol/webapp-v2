@@ -1,7 +1,7 @@
 import { TokenInputField } from 'components/tokenInputField/TokenInputField';
 import { useDebounce } from 'hooks/useDebounce';
 import { Token } from 'services/observables/tokens';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { getRateAndPriceImapct, swap } from 'services/web3/swap/market';
 import { ReactComponent as IconSync } from 'assets/icons/sync.svg';
 import { useDispatch } from 'react-redux';
@@ -18,6 +18,16 @@ import BigNumber from 'bignumber.js';
 import { openWalletModal } from 'redux/user/user';
 import { ModalApprove } from 'elements/modalApprove/modalApprove';
 import { sanitizeNumberInput } from 'utils/pureFunctions';
+import {
+  sendConversionEvent,
+  ConversionEvents,
+  getConversion,
+} from 'services/api/googleTagManager';
+import { EthNetworks } from 'services/web3/types';
+import { Toggle } from 'elements/swapWidget/SwapWidget';
+import { setConversion } from 'services/api/googleTagManager';
+import { withdrawWeth } from 'services/web3/swap/limit';
+
 interface SwapMarketProps {
   fromToken: Token;
   setFromToken: Function;
@@ -43,8 +53,9 @@ export const SwapMarket = ({
   const [priceImpact, setPriceImpact] = useState('');
   const [fromError, setFromError] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [disableSwap, setDisableSwap] = useState(false);
   const [rateToggle, setRateToggle] = useState(false);
+  const [isLoadingRate, setIsLoadingRate] = useState(false);
+  const fiatToggle = useContext(Toggle);
   const dispatch = useDispatch();
 
   const tokens = useAppSelector<Token[]>((state) => state.bancor.tokens);
@@ -52,24 +63,41 @@ export const SwapMarket = ({
     (state) => state.user.slippageTolerance
   );
 
+  const loadRateAndPriceImapct = async (
+    fromToken: Token,
+    toToken: Token,
+    amount: string
+  ) => {
+    setIsLoadingRate(true);
+    const res = await getRateAndPriceImapct(fromToken, toToken, amount);
+    setIsLoadingRate(false);
+    return res;
+  };
+
+  useEffect(() => {
+    setIsLoadingRate(true);
+  }, [fromAmount]);
+
   useEffect(() => {
     (async () => {
       if (toToken && toToken.address === wethToken) setToToken(undefined);
       else if (fromToken && toToken && fromToken.address !== wethToken) {
-        const res = await getRateAndPriceImapct(fromToken, toToken, '1');
+        const res = await loadRateAndPriceImapct(fromToken, toToken, '1');
         setRate(res.rate);
-        setPriceImpact(res.priceImpact);
+        if (fromDebounce) setPriceImpact(res.priceImpact);
+        else setPriceImpact('0.00');
       }
     })();
-  }, [fromToken, toToken, setToToken]);
+  }, [fromToken, toToken, setToToken, fromDebounce]);
 
   useEffect(() => {
     if (fromToken && fromToken.address === wethToken) {
       const eth = tokens.find((x) => x.address === ethToken);
       setRate('1');
-      setPriceImpact('0.0000');
+      setPriceImpact('0.00');
       setToToken(eth);
       setToAmount(fromDebounce);
+      setIsLoadingRate(false);
     } else {
       (async () => {
         if (
@@ -79,11 +107,12 @@ export const SwapMarket = ({
         ) {
           setToAmount('');
           setToAmountUsd('');
-          const res = await getRateAndPriceImapct(fromToken, toToken, '1');
+          const res = await loadRateAndPriceImapct(fromToken, toToken, '1');
           setRate(res.rate);
-          setPriceImpact(res.priceImpact);
+          if (fromDebounce) setPriceImpact(res.priceImpact);
+          else setPriceImpact('0.00');
         } else if (fromToken && toToken) {
-          const result = await getRateAndPriceImapct(
+          const result = await loadRateAndPriceImapct(
             fromToken,
             toToken,
             fromDebounce
@@ -101,7 +130,8 @@ export const SwapMarket = ({
             .toString();
           setToAmountUsd(usdAmount);
           setRate(rate.toString());
-          setPriceImpact(result.priceImpact);
+          if (fromDebounce) setPriceImpact(result.priceImpact);
+          else setPriceImpact('0.00');
         }
       })();
     }
@@ -124,16 +154,17 @@ export const SwapMarket = ({
         fromToken,
         fromAmount
       );
-      if (isApprovalReq) setShowModal(true);
-      else await handleSwap(true);
+      if (isApprovalReq) {
+        const conversion = getConversion();
+        sendConversionEvent(ConversionEvents.approvePop, conversion);
+        setShowModal(true);
+      } else await handleSwap(true);
     } catch (e) {
-      console.error('getNetworkContractApproval failed', e);
-      setDisableSwap(false);
       dispatch(
         addNotification({
           type: NotificationType.error,
-          title: 'Check Allowance',
-          msg: 'Unkown error - check console log.',
+          title: 'Transaction Failed',
+          msg: `${fromToken.symbol} approval had failed. Please try again or contact support.`,
         })
       );
     }
@@ -147,8 +178,12 @@ export const SwapMarket = ({
 
     if (!(chainId && toToken)) return;
 
-    setDisableSwap(true);
     if (!approved) return checkApproval();
+
+    if (fromToken.address === wethToken) {
+      dispatch(addNotification(await withdrawWeth(fromAmount, account)));
+      return;
+    }
 
     try {
       const txHash = await swap({
@@ -158,34 +193,49 @@ export const SwapMarket = ({
         fromAmount,
         toAmount,
         user: account,
-        onConfirmation,
       });
 
       dispatch(
         addNotification({
           type: NotificationType.pending,
-          title: 'Test Notification',
-          msg: 'Some message here...',
+          title: 'Pending Confirmation',
+          msg: `Trading ${fromAmount} ${fromToken.symbol} is Pending Confirmation`,
+          updatedInfo: {
+            successTitle: 'Success!',
+            successMsg: `Your trade ${fromAmount} ${fromToken.symbol} for ${toAmount} ${toToken.symbol} has been confirmed`,
+            errorTitle: 'Transaction Failed',
+            errorMsg: `Trading ${fromAmount} ${fromToken.symbol} for ${toAmount} ${toToken.symbol} had failed. Please try again or contact support`,
+          },
           txHash,
         })
       );
     } catch (e) {
       console.error('Swap failed with error: ', e);
-      setDisableSwap(false);
-      dispatch(
-        addNotification({
-          type: NotificationType.error,
-          title: 'Swap Failed',
-          msg: e.message,
-        })
-      );
+      if (e.message.includes('User denied transaction signature'))
+        dispatch(
+          addNotification({
+            type: NotificationType.error,
+            title: 'Transaction Rejected',
+            msg: 'You rejected the trade. If this was by mistake, please try again.',
+          })
+        );
+      else {
+        const conversion = getConversion();
+        sendConversionEvent(ConversionEvents.fail, {
+          conversion,
+          error: e.message,
+        });
+        dispatch(
+          addNotification({
+            type: NotificationType.error,
+            title: 'Transaction Failed',
+            msg: `Trading ${fromAmount} ${fromToken.symbol} for ${toAmount} ${toToken.symbol} had failed. Please try again or contact support`,
+          })
+        );
+      }
     } finally {
       setShowModal(false);
     }
-  };
-
-  const onConfirmation = () => {
-    setDisableSwap(false);
   };
 
   const handleSwitch = () => {
@@ -207,9 +257,9 @@ export const SwapMarket = ({
   }, [fromAmount, fromToken]);
 
   const isSwapDisabled = () => {
+    if (isLoadingRate) return true;
     if (fromError !== '') return true;
     if (rate === '0') return true;
-    if (disableSwap) return true;
     if (fromAmount === '' || new BigNumber(fromAmount).eq(0)) return true;
     if (!toToken) return true;
     if (!account) return false;
@@ -282,42 +332,71 @@ export const SwapMarket = ({
               startEmpty
               excludedTokens={[fromToken && fromToken.address, wethToken]}
               usdSlippage={usdSlippage()}
+              isLoading={isLoadingRate}
             />
             {toToken && (
               <>
-                <div className="flex justify-between mt-15">
+                <div className="flex justify-between items-center mt-15">
                   <span>Rate</span>
-                  <span
-                    className="flex cursor-pointer"
-                    onClick={() => setRateToggle(!rateToggle)}
-                  >
-                    {rateToggle
-                      ? `1 ${fromToken?.symbol} = ${prettifyNumber(rate)} ${
-                          toToken?.symbol
-                        }`
-                      : `1 ${toToken?.symbol} = ${prettifyNumber(
-                          rate === '0' ? 0 : 1 / Number(rate)
-                        )} ${fromToken?.symbol}`}
-                    <IconSync className="w-12 ml-[3px]" />
-                  </span>
+                  {isLoadingRate ? (
+                    <div className="loading-skeleton h-10 w-[140px]"></div>
+                  ) : (
+                    <button
+                      className="flex items-center"
+                      onClick={() => setRateToggle(!rateToggle)}
+                    >
+                      {rateToggle
+                        ? `1 ${fromToken?.symbol} = ${prettifyNumber(rate)} ${
+                            toToken?.symbol
+                          }`
+                        : `1 ${toToken?.symbol} = ${prettifyNumber(
+                            rate === '0' ? 0 : 1 / Number(rate)
+                          )} ${fromToken?.symbol}`}
+                      <IconSync className="w-12 ml-[3px]" />
+                    </button>
+                  )}
                 </div>
                 <div className="flex justify-between">
                   <span>Price Impact</span>
-                  <span
-                    data-cy="priceImpact"
-                    className={`${
-                      new BigNumber(priceImpact).gte(3) ? 'text-error' : ''
-                    }`}
-                  >
-                    {priceImpact}%
-                  </span>
+                  {isLoadingRate ? (
+                    <div className="loading-skeleton h-10 w-[80px]"></div>
+                  ) : (
+                    <span
+                      data-cy="priceImpact"
+                      className={`${
+                        new BigNumber(priceImpact).gte(3) ? 'text-error' : ''
+                      }`}
+                    >
+                      {priceImpact}%
+                    </span>
+                  )}
                 </div>
               </>
             )}
           </div>
 
           <button
-            onClick={() => handleSwap()}
+            onClick={() => {
+              const conversion = {
+                conversion_type: 'Market',
+                conversion_blockchain_network:
+                  chainId === EthNetworks.Ropsten ? 'Ropsten' : 'MainNet',
+                conversion_settings:
+                  slippageTolerance === 0.005 ? 'Regular' : 'Advanced',
+                conversion_token_pair: fromToken.symbol + '/' + toToken?.symbol,
+                conversion_from_token: fromToken.symbol,
+                conversion_to_token: toToken?.symbol,
+                conversion_from_amount: fromAmount,
+                conversion_from_amount_usd: fromAmountUsd,
+                conversion_to_amount: toAmount,
+                conversion_to_amount_usd: toAmountUsd,
+                conversion_input_type: fiatToggle ? 'Fiat' : 'Token',
+                conversion_rate: rate,
+              };
+              setConversion(conversion);
+              sendConversionEvent(ConversionEvents.click, conversion);
+              handleSwap();
+            }}
             className={`${buttonVariant()} rounded w-full`}
             disabled={isSwapDisabled()}
           >
@@ -331,7 +410,7 @@ export const SwapMarket = ({
         amount={fromAmount}
         fromToken={fromToken}
         handleApproved={() => handleSwap(true)}
-        handleCatch={() => setDisableSwap(false)}
+        waitForApproval={true}
       />
     </>
   );

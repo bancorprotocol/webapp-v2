@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import dayjs from 'utils/dayjs';
 import BigNumber from 'bignumber.js';
 import { InputField } from 'components/inputField/InputField';
@@ -26,6 +33,14 @@ import { ModalApprove } from 'elements/modalApprove/modalApprove';
 import { getNetworkContractApproval } from 'services/web3/approval';
 import { Modal } from 'components/modal/Modal';
 import { prettifyNumber } from 'utils/helperFunctions';
+import { Toggle } from 'elements/swapWidget/SwapWidget';
+import {
+  sendConversionEvent,
+  ConversionEvents,
+  getConversion,
+} from 'services/api/googleTagManager';
+import { EthNetworks } from 'services/web3/types';
+import { setConversion } from 'services/api/googleTagManager';
 
 enum Field {
   from,
@@ -49,7 +64,7 @@ export const SwapLimit = ({
   switchTokens,
 }: SwapLimitProps) => {
   const dispatch = useDispatch();
-  const { account } = useWeb3React();
+  const { account, chainId } = useWeb3React();
   const [fromAmount, setFromAmount] = useState('');
   const [toAmount, setToAmount] = useState('');
   const [toAmountUsd, setToAmountUsd] = useState('');
@@ -60,9 +75,9 @@ export const SwapLimit = ({
   const [selPercentage, setSelPercentage] = useState(1);
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [showEthModal, setShowEthModal] = useState(false);
-  const [disableSwap, setDisableSwap] = useState(false);
   const [fromError, setFromError] = useState('');
   const [rateWarning, setRateWarning] = useState({ type: '', msg: '' });
+  const [isLoadingRate, setIsLoadingRate] = useState(false);
   const [duration, setDuration] = useState(
     dayjs.duration({ days: 7, hours: 0, minutes: 0 })
   );
@@ -72,11 +87,12 @@ export const SwapLimit = ({
   const keeperDaoTokens = useAppSelector<KeeprDaoToken[]>(
     (state) => state.bancor.keeperDaoTokens
   );
+  const fiatToggle = useContext(Toggle);
 
   const percentages = useMemo(() => [1, 3, 5], []);
 
   useInterval(() => {
-    fetchMarketRate();
+    fetchMarketRate(false);
   }, 15000);
 
   const calculatePercentageByRate = useCallback(
@@ -183,24 +199,23 @@ export const SwapLimit = ({
     [percentages, fromAmount, toAmount, handleFieldChanged]
   );
 
-  const fetchMarketRate = useCallback(async () => {
-    if (!fromToken || !toToken) return;
-    if (toToken.address === ethToken) return;
+  const fetchMarketRate = useCallback(
+    async (setLoading = true) => {
+      if (!fromToken || !toToken) return;
+      if (toToken.address === ethToken) return;
 
-    const res = await getRateAndPriceImapct(fromToken, toToken, '1', true);
-    setMarketRate(Number(res.rate));
-  }, [fromToken, toToken]);
+      setIsLoadingRate(setLoading);
+      const res = await getRateAndPriceImapct(fromToken, toToken, '1', true);
+      setMarketRate(Number(res.rate));
+      setIsLoadingRate(false);
+    },
+    [fromToken, toToken]
+  );
 
   useEffect(() => {
     calculateRateByMarket(marketRate, selPercentage, percentage);
-  }, [
-    calculateRateByMarket,
-    marketRate,
-    selPercentage,
-    percentage,
-    fromToken,
-    toToken,
-  ]);
+    // eslint-disable-next-line
+  }, [calculateRateByMarket, fromToken, toToken]);
 
   useEffect(() => {
     if (toToken && toToken.address === ethToken)
@@ -216,16 +231,17 @@ export const SwapLimit = ({
   const checkApproval = async (token: Token) => {
     try {
       const isApprovalReq = await getNetworkContractApproval(token, fromAmount);
-      if (isApprovalReq) setShowApproveModal(true);
-      else await handleSwap(true);
+      if (isApprovalReq) {
+        const conversion = getConversion();
+        sendConversionEvent(ConversionEvents.approvePop, conversion);
+        setShowApproveModal(true);
+      } else await handleSwap(true);
     } catch (e) {
-      console.error('getNetworkContractApproval failed', e);
-      setDisableSwap(false);
       dispatch(
         addNotification({
           type: NotificationType.error,
-          title: 'Check Allowance',
-          msg: 'Unkown error - check console log.',
+          title: 'Transaction Failed',
+          msg: `${fromToken.symbol} approval had failed. Please try again or contact support.`,
         })
       );
     }
@@ -243,7 +259,6 @@ export const SwapLimit = ({
 
     if (!(fromToken && toToken && fromAmount && toAmount)) return;
 
-    setDisableSwap(true);
     if (showETHtoWETHModal) return setShowEthModal(true);
 
     if (!approved) return checkApproval(fromToken);
@@ -258,10 +273,24 @@ export const SwapLimit = ({
       checkApproval
     );
 
-    if (notification) {
-      dispatch(addNotification(notification));
-      setDisableSwap(false);
-    }
+    if (notification) dispatch(addNotification(notification));
+  };
+
+  const isSwapDisabled = () => {
+    if (isLoadingRate) return true;
+    if (fromError !== '') return true;
+    if (
+      fromAmount === '' ||
+      toAmount === '' ||
+      rate === '' ||
+      new BigNumber(fromAmount).eq(0) ||
+      new BigNumber(toAmount).eq(0) ||
+      new BigNumber(rate).eq(0)
+    )
+      return true;
+    if (!toToken) return true;
+    if (!account) return false;
+    return false;
   };
 
   // handle input errors
@@ -275,6 +304,7 @@ export const SwapLimit = ({
   }, [fromAmount, fromToken]);
 
   const handleRateInput = (val: string) => {
+    console.log('handleRateInput');
     setRate(val);
     calculatePercentageByRate(marketRate, val);
     handleFieldChanged(Field.rate, fromAmount, toAmount, val);
@@ -348,22 +378,33 @@ export const SwapLimit = ({
           />
           {toToken && (
             <>
-              <div className="flex justify-between mt-28 mb-2">
+              <div className="flex justify-between items-center mt-28 mb-2 pr-10">
                 <div className="font-medium">Rate</div>
-                <div className="text-12 pr-10">
-                  Market Rate:{' '}
-                  {`1 ${fromToken?.symbol} = ${prettifyNumber(marketRate)} ${
-                    toToken?.symbol
-                  }`}
-                </div>
+                {isLoadingRate ? (
+                  <div className="loading-skeleton h-10 w-[190px]"></div>
+                ) : (
+                  <div className="text-12">
+                    Market Rate:{' '}
+                    {`1 ${fromToken?.symbol} = ${prettifyNumber(marketRate)} ${
+                      toToken?.symbol
+                    }`}
+                  </div>
+                )}
               </div>
               <div className="flex justify-between items-center">
                 <div className="whitespace-nowrap text-20 min-w-[135px]">{`1 ${fromToken?.symbol} =`}</div>
-                <InputField format input={rate} onChange={handleRateInput} />
+                <div className="relative w-full">
+                  {isLoadingRate && (
+                    <div className="absolute flex justify-end bottom-[17px] bg-white dark:bg-blue-4 h-[21px] w-full pr-15">
+                      <div className="loading-skeleton h-[24px] w-4/5"></div>
+                    </div>
+                  )}
+                  <InputField format input={rate} onChange={handleRateInput} />
+                </div>
               </div>
               {rateWarning.msg && marketRate !== -1 && (
                 <div
-                  className={`mt-10 text-center ${classNameGenerator({
+                  className={`mt-10 text-center text-12 ${classNameGenerator({
                     'text-error': rateWarning.type === 'error',
                     'text-warning': rateWarning.type === 'warning',
                   })}`}
@@ -433,16 +474,12 @@ export const SwapLimit = ({
           handleApproved={() =>
             handleSwap(true, fromToken.address === ethToken)
           }
-          handleCatch={() => setDisableSwap(false)}
         />
         <Modal
           title="Deposit ETH to WETH"
           isOpen={showEthModal}
           setIsOpen={setShowEthModal}
-          onClose={() => {
-            setShowEthModal(false);
-            setDisableSwap(false);
-          }}
+          onClose={() => setShowEthModal(false)}
         >
           <>
             <div>Deposited ETH Will Be Converted to WETH</div>
@@ -460,12 +497,33 @@ export const SwapLimit = ({
 
         <button
           className="btn-primary rounded w-full"
-          onClick={() =>
-            handleSwap(false, false, fromToken.address === ethToken)
-          }
-          disabled={fromError !== '' || disableSwap}
+          onClick={() => {
+            const conversion = {
+              conversion_type: 'Limit',
+              conversion_blockchain_network:
+                chainId === EthNetworks.Ropsten ? 'Ropsten' : 'MainNet',
+              conversion_token_pair: fromToken.symbol + '/' + toToken?.symbol,
+              conversion_from_token: fromToken.symbol,
+              conversion_to_token: toToken?.symbol,
+              conversion_from_amount: fromAmount,
+              conversion_from_amount_usd: fromAmountUsd,
+              conversion_to_amount: toAmount,
+              conversion_to_amount_usd: toAmountUsd,
+              conversion_input_type: fiatToggle ? 'Fiat' : 'Token',
+              conversion_rate: rate,
+              conversion_rate_percentage:
+                selPercentage === -1
+                  ? percentage
+                  : percentages[selPercentage].toFixed(0),
+              conversion_experation: duration.asSeconds().toString(),
+            };
+            setConversion(conversion);
+            sendConversionEvent(ConversionEvents.click, conversion);
+            handleSwap(false, false, fromToken.address === ethToken);
+          }}
+          disabled={isSwapDisabled()}
         >
-          Swap
+          Trade
         </button>
       </div>
     </div>

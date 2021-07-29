@@ -14,9 +14,10 @@ import { useAppSelector } from 'redux/index';
 import { useDispatch } from 'react-redux';
 import { openWalletModal } from 'redux/user/user';
 import { Image } from 'components/image/Image';
+import { sendWalletEvent, WalletEvents } from 'services/api/googleTagManager';
 
 export const WalletModal = ({ isMobile }: { isMobile: boolean }) => {
-  const { activate, deactivate, account, connector } = useWeb3React();
+  const { activate, deactivate, account, connector, active } = useWeb3React();
   const [pending, setPending] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
   const [selectedWallet, setSelectedWallet] = useState<WalletInfo | null>(null);
@@ -30,6 +31,9 @@ export const WalletModal = ({ isMobile }: { isMobile: boolean }) => {
   };
 
   const tryConnecting = async (wallet: WalletInfo) => {
+    sendWalletEvent(WalletEvents.click, {
+      wallet_name: wallet.name,
+    });
     setPending(true);
     setSelectedWallet(wallet);
     const { connector } = wallet;
@@ -45,6 +49,13 @@ export const WalletModal = ({ isMobile }: { isMobile: boolean }) => {
         .then(async () => {
           setIsOpen(false);
           setAutoLogin(true);
+          const account = await connector.getAccount();
+          sendWalletEvent(
+            WalletEvents.connect,
+            undefined,
+            account ? account : '',
+            wallet.name ?? ''
+          );
         })
         .catch((error) => {
           setSelectedWallet(null);
@@ -61,11 +72,20 @@ export const WalletModal = ({ isMobile }: { isMobile: boolean }) => {
       setAutoLogin(false);
       setSelectedWallet(null);
     } else {
+      sendWalletEvent(WalletEvents.popup);
       setError(false);
       setPending(false);
       setIsOpen(true);
     }
   };
+
+  useEffect(() => {
+    if (!active) {
+      setSelectedWallet(null);
+      setError(false);
+      setPending(false);
+    }
+  }, [active]);
 
   useEffect(() => {
     if (connector) {
@@ -90,7 +110,7 @@ export const WalletModal = ({ isMobile }: { isMobile: boolean }) => {
           'btn-outline-secondary btn-sm mr-40': !isMobile,
         })}
       >
-        {selectedWallet ? (
+        {selectedWallet && account ? (
           <Image src={selectedWallet.icon} alt="" className="w-[22px]" />
         ) : (
           <IconWallet className="text-primary dark:text-primary-light w-[22px]" />
@@ -140,7 +160,7 @@ export const WalletModal = ({ isMobile }: { isMobile: boolean }) => {
                   <button
                     key={index}
                     onClick={() => tryConnecting(wallet)}
-                    className="flex items-center w-full px-16 py-10 border-2 border-grey-2 rounded-20 hover:border-primary focus:outline-none focus:border-primary"
+                    className="flex items-center w-full px-16 py-10 border-2 border-grey-2 dark:border-grey-4 rounded-20 hover:border-primary dark:hover:border-primary focus:outline-none focus:border-primary dark:focus:border-primary"
                   >
                     <Image
                       src={wallet.icon}

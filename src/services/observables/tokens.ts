@@ -5,7 +5,7 @@ import { EthNetworks } from 'services/web3/types';
 import { toChecksumAddress } from 'web3-utils';
 import { apiTokens$ } from './pools';
 import { user$ } from './user';
-import { updateTokenBalances } from './balances';
+import { fetchBalances, userBalances$ } from './balances';
 import { switchMapIgnoreThrow } from './customOperators';
 import { currentNetwork$ } from './network';
 import {
@@ -36,7 +36,7 @@ export interface Token {
   balance: string | null;
 }
 
-const listOfLists = [
+export const listOfLists = [
   {
     uri: 'https://tokens.coingecko.com/ethereum/all.json',
     name: 'CoinGecko',
@@ -90,7 +90,6 @@ const tokenListMerged$ = combineLatest([
 ]).pipe(
   switchMapIgnoreThrow(
     async ([userPreferredListIds, tokenLists]): Promise<Token[]> => {
-      if (userPreferredListIds.length === 0) return tokenLists[0].tokens;
       const filteredTokenLists = tokenLists.filter((list) =>
         userPreferredListIds.some((id) => id === list.name)
       );
@@ -106,7 +105,7 @@ const tokenListMerged$ = combineLatest([
   shareReplay()
 );
 
-export const tokens$ = combineLatest([
+export const tokensWithoutBalances$ = combineLatest([
   tokenListMerged$,
   apiTokens$,
   user$,
@@ -146,17 +145,28 @@ export const tokens$ = combineLatest([
       }
     });
 
-    if (user) {
-      const updatedTokens = await updateTokenBalances(
-        overlappingTokens,
-        user,
-        currentNetwork
-      );
+    fetchBalances(overlappingTokens.map((token) => token.address));
 
-      return updatedTokens;
-    } else {
-      return overlappingTokens;
-    }
+    return overlappingTokens;
+  }),
+  shareReplay(1)
+);
+
+export const tokens$ = combineLatest([
+  tokensWithoutBalances$,
+  userBalances$,
+]).pipe(
+  map(([tokens, userBalances]) => {
+    return tokens.map((token) => {
+      if (userBalances) {
+        const userBalance = userBalances[token.address];
+        return userBalance === undefined
+          ? token
+          : { ...token, balance: userBalance };
+      } else {
+        return token;
+      }
+    });
   }),
   shareReplay(1)
 );

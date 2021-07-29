@@ -7,7 +7,7 @@ import {
 } from 'redux/notification/notification';
 import { take } from 'rxjs/operators';
 import { exchangeProxy$ } from 'services/observables/contracts';
-import { tokens$, Token } from 'services/observables/tokens';
+import { tokensWithoutBalances$, Token } from 'services/observables/tokens';
 import { resolveTxOnConfirmation } from 'services/web3';
 import { ethToken, wethToken } from 'services/web3/config';
 import {
@@ -17,6 +17,11 @@ import {
 import { createOrder, depositWeth } from 'services/web3/swap/limit';
 import { prettifyNumber } from 'utils/helperFunctions';
 import { shrinkToken } from 'utils/pureFunctions';
+import {
+  sendConversionEvent,
+  ConversionEvents,
+  getConversion,
+} from './googleTagManager';
 
 const baseUrl: string = 'https://hidingbook.keeperdao.com/api/v1';
 
@@ -38,12 +43,33 @@ export const swapLimit = async (
   checkApproval: Function
 ): Promise<BaseNotification | undefined> => {
   const fromIsEth = ethToken === fromToken.address;
-
+  const conversion = getConversion();
   try {
     if (fromIsEth) {
-      await depositWeth(from, user);
-      await checkApproval({ ...fromToken, address: wethToken });
+      try {
+        const txHash = await depositWeth(from, user);
+        checkApproval({ ...fromToken, address: wethToken });
+        return {
+          type: NotificationType.pending,
+          title: 'Pending Confirmation',
+          msg: `Depositing ${from} ETH to WETH is pending confirmation`,
+          txHash,
+          updatedInfo: {
+            successTitle: 'Success!',
+            successMsg: `Your deposit ${from} ETH to WETH is confirmed`,
+            errorTitle: 'Transaction Failed',
+            errorMsg: `Depositing ${from} ETH to WETH has failed. Please try again or contact support`,
+          },
+        };
+      } catch (error) {
+        return {
+          type: NotificationType.error,
+          title: 'Transaction Failed',
+          msg: `Depositing ${from} ETH to WETH has failed. Please try again or contact support`,
+        };
+      }
     } else {
+      sendConversionEvent(ConversionEvents.wallet_req, conversion);
       await createOrder(
         fromToken,
         toToken,
@@ -52,17 +78,35 @@ export const swapLimit = async (
         user,
         duration.asSeconds()
       );
+      sendConversionEvent(ConversionEvents.success, {
+        ...conversion,
+        conversion_market_token_rate: fromToken.usdPrice,
+        transaction_category: 'Conversion',
+      });
+
       return {
         type: NotificationType.success,
-        title: 'Title',
-        msg: 'Message',
+        title: 'Success!',
+        msg: `Your limit order to trade ${from} ${fromToken.symbol} for ${to} ${toToken.symbol} was created`,
       };
     }
   } catch (error) {
+    if (error.message.includes('User denied transaction signature'))
+      return {
+        type: NotificationType.error,
+        title: 'Transaction Rejected',
+        msg: 'You rejected the transaction. If this was by mistake, please try again.',
+      };
+
+    sendConversionEvent(ConversionEvents.fail, {
+      conversion,
+      error: error.message,
+    });
+
     return {
       type: NotificationType.error,
-      title: 'Title',
-      msg: 'Message',
+      title: 'Transaction Failed',
+      msg: `Limit order to trade ${from} ${fromToken.symbol} for ${to} ${toToken.symbol} could not be created. Please try again or contact support`,
     };
   }
 };
@@ -84,7 +128,7 @@ export interface KeeprDaoToken {
 
 export const fetchKeeperDaoTokens = async (): Promise<KeeprDaoToken[]> => {
   try {
-    const tokens = await tokens$.pipe(take(1)).toPromise();
+    const tokens = await tokensWithoutBalances$.pipe(take(1)).toPromise();
     const res = await axios.get(`${baseUrl}/tokenList`);
     return res.data.result.tokens;
   } catch (error) {
@@ -110,7 +154,7 @@ export const getOrders = async (currentUser: string): Promise<LimitOrder[]> => {
 const orderResToLimit = async (
   orders: OrderResponse[]
 ): Promise<LimitOrder[]> => {
-  const tokens = await tokens$.pipe(take(1)).toPromise();
+  const tokens = await tokensWithoutBalances$.pipe(take(1)).toPromise();
 
   return orders.map((res) => {
     const payToken =
@@ -177,18 +221,33 @@ export const cancelOrders = async (
           ? contract.methods.cancelRfqOrder(stringOrders[0])
           : contract.methods.batchCancelRfqOrders(stringOrders),
       user,
+      resolveImmediately: true,
     });
     return {
-      type: NotificationType.success,
-      title: 'Title',
-      msg: 'Message',
+      type: NotificationType.pending,
+      title: 'Pending Confirmation',
+      msg: 'Transaction is pending confirmationn',
       txHash,
+      updatedInfo: {
+        successTitle: 'Success!',
+        successMsg: 'Canceling your limit orders has been confirmed',
+        errorTitle: 'Transaction Failed',
+        errorMsg:
+          'Transaction had failed. Please try again or contact support.',
+      },
     };
   } catch (error) {
+    if (error.message.includes('User denied transaction signature'))
+      return {
+        type: NotificationType.error,
+        title: 'Transaction Rejected',
+        msg: 'You rejected the transaction. If this was by mistake, please try again.',
+      };
+
     return {
       type: NotificationType.error,
-      title: 'Title',
-      msg: 'Message',
+      title: 'Transaction Failed',
+      msg: 'Transaction had failed. Please try again or contact support.',
     };
   }
 };

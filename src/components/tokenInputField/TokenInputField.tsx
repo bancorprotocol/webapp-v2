@@ -29,6 +29,7 @@ interface TokenInputFieldProps {
   dataCy?: string;
   excludedTokens?: string[];
   includedTokens?: string[];
+  isLoading?: boolean;
 }
 
 export const TokenInputField = ({
@@ -50,6 +51,7 @@ export const TokenInputField = ({
   usdSlippage,
   excludedTokens = [],
   includedTokens = [],
+  isLoading,
 }: TokenInputFieldProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showSelectToken, setSelectToken] = useState(!!startEmpty);
@@ -161,8 +163,8 @@ export const TokenInputField = ({
               </>
             ) : (
               <>
-                <div className="bg-grey-2 rounded-full h-28 w-28 animate-pulse"></div>
-                <div className="mx-10 h-16 w-50 bg-grey-2 animate-pulse rounded-full"></div>
+                <div className="loading-skeleton h-28 w-28"></div>
+                <div className="loading-skeleton mx-10 h-16 w-50"></div>
               </>
             )}
 
@@ -174,15 +176,25 @@ export const TokenInputField = ({
           </div>
           <div className="w-full">
             <div className="relative w-full">
-              <div className="absolute text-12 bottom-0 right-0 mr-[22px] mb-10">
-                {convertedAmount()} {toggle && token?.symbol}
-                {usdSlippage && (
-                  <span className="text-grey-3 ml-4">({usdSlippage}%)</span>
+              <div className="absolute text-12 bottom-0 right-0 w-full">
+                {isLoading ? (
+                  <div className="flex flex-col items-end right-[15px] bottom-12 absolute w-4/5 bg-white dark:bg-blue-4 ">
+                    <div className="loading-skeleton h-[22px] w-full mb-[8px]"></div>
+                    <div className="loading-skeleton h-12 w-80 mr-2"></div>
+                  </div>
+                ) : (
+                  <div className="text-right mr-[22px] mb-10">
+                    {convertedAmount()} {toggle && token?.symbol}
+                    {usdSlippage && (
+                      <span className="text-grey-3 ml-4">({usdSlippage}%)</span>
+                    )}
+                  </div>
                 )}
               </div>
               <input
                 data-cy={dataCy}
                 type="text"
+                inputMode="decimal"
                 value={inputValue()}
                 disabled={disabled}
                 placeholder={toggle ? '~$0.00' : '0.00'}
