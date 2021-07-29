@@ -149,7 +149,7 @@ export const SwapWidget = ({ isLimit, setIsLimit }: SwapWidgetProps) => {
           <Insight tokens={insightTokens} onClose={() => showInsights(false)} />
         ) : (
           <div>
-            <div className="w-40 h-40 p-30 mx-4 rounded rounded-2xl bg-white ">
+            <div className="p-20 mx-4 rounded rounded-2xl bg-white">
               <IconLightbulb
                 className="w-[28px] h-[23px] dark:text-grey-4"
                 onClick={() => showInsights(true)}
