@@ -11,7 +11,7 @@ import { ethToken } from 'services/web3/config';
 import { web3 } from 'services/web3/contracts';
 import { toChecksumAddress } from 'web3-utils';
 import { combineLatest, Subject } from 'rxjs';
-import { user$ } from './user';
+import { onLogin$, user$ } from './user';
 import {
   distinctUntilChanged,
   map,
@@ -100,7 +100,7 @@ export const fetchTokenBalances = async (
     }
     return mergedWei;
   } catch (e) {
-    console.error('Failed fetching balances');
+    console.error('Failed fetching balances', e);
   }
 
   return [];
@@ -118,7 +118,7 @@ export const fetchBalances = (addresses: string[]) =>
 
 const rawBalances$ = combineLatest([
   fetchBalanceReceiver$,
-  user$,
+  onLogin$,
   apiTokens$,
   currentNetwork$,
 ]).pipe(

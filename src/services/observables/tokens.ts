@@ -108,10 +108,9 @@ const tokenListMerged$ = combineLatest([
 export const tokensWithoutBalances$ = combineLatest([
   tokenListMerged$,
   apiTokens$,
-  user$,
   currentNetwork$,
 ]).pipe(
-  switchMapIgnoreThrow(async ([tokenList, apiTokens, user, currentNetwork]) => {
+  switchMapIgnoreThrow(async ([tokenList, apiTokens, currentNetwork]) => {
     const newApiTokens = [...apiTokens, buildWethToken(apiTokens)].map((x) => ({
       address: x.dlt_id,
       symbol: x.symbol,

@@ -23,7 +23,7 @@ interface Thresholds {
 interface OverviewRes {
   concentration: number;
   inOutOfTheMoney: InOutOfTheMoney;
-  byTimeHeldComposition: ByTimeHeldComposition;
+  byTimeHeldComposition?: ByTimeHeldComposition;
 }
 
 interface InOutOfTheMoney {
@@ -42,12 +42,22 @@ export interface IntoTheBlock {
   summary: Summary;
   inOutOfTheMoney: InOutOfTheMoney;
   concentration: number;
-  byTimeHeldComposition: ByTimeHeldComposition;
+  byTimeHeldComposition?: ByTimeHeldComposition;
   symbol: string;
 }
 
 axios.defaults.headers.common = {
   'x-api-key': apiKey,
+};
+
+const calculateTimeHeld = (timeHeld: ByTimeHeldComposition) => {
+  const sumTimeHeld = timeHeld.hodler + timeHeld.cruiser + timeHeld.trader;
+  const byTimeHeldComposition = {
+    hodler: timeHeld.hodler / sumTimeHeld,
+    cruiser: timeHeld.cruiser / sumTimeHeld,
+    trader: timeHeld.trader / sumTimeHeld,
+  };
+  return byTimeHeldComposition;
 };
 
 export const intoTheBlockByToken = async (
@@ -60,8 +70,10 @@ export const intoTheBlockByToken = async (
     ]);
     const inOut = overview.data.inOutOfTheMoney;
     const timeHeld = overview.data.byTimeHeldComposition;
+
+    const byTimeHeldComposition = timeHeld && calculateTimeHeld(timeHeld);
+
     const sumInOut = inOut.in + inOut.between + inOut.out;
-    const sumTimeHeld = timeHeld.hodler + timeHeld.cruiser + timeHeld.trader;
     return {
       summary: signal.data.summary,
       symbol,
@@ -71,11 +83,7 @@ export const intoTheBlockByToken = async (
         out: inOut.out / sumInOut,
       },
       concentration: overview.data.concentration,
-      byTimeHeldComposition: {
-        hodler: timeHeld.hodler / sumTimeHeld,
-        cruiser: timeHeld.cruiser / sumTimeHeld,
-        trader: timeHeld.trader / sumTimeHeld,
-      },
+      ...(byTimeHeldComposition && { byTimeHeldComposition }),
     };
   } catch (error) {
     console.error(error);

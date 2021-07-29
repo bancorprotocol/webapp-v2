@@ -49,20 +49,27 @@ export const InsightRow = ({ token }: { token: InsightToken }) => {
         { colour: Colour.Grey, decPercent: remainingConcentration },
       ],
     },
-    {
-      label: 'Holders composition by time held',
-      percentages: [
-        {
-          colour: Colour.Blue,
-          decPercent: token.byTimeHeldComposition.cruiser,
-        },
-        { colour: Colour.Red, decPercent: token.byTimeHeldComposition.trader },
-        {
-          colour: Colour.Green,
-          decPercent: token.byTimeHeldComposition.hodler,
-        },
-      ],
-    },
+    ...(token.byTimeHeldComposition
+      ? [
+          {
+            label: 'Holders composition by time held',
+            percentages: [
+              {
+                colour: Colour.Blue,
+                decPercent: token.byTimeHeldComposition.cruiser,
+              },
+              {
+                colour: Colour.Red,
+                decPercent: token.byTimeHeldComposition.trader,
+              },
+              {
+                colour: Colour.Green,
+                decPercent: token.byTimeHeldComposition.hodler,
+              },
+            ],
+          },
+        ]
+      : []),
   ];
 
   const rows = cards.map((colour) => ({
@@ -130,14 +137,17 @@ export const InsightRow = ({ token }: { token: InsightToken }) => {
         </div>
         <div className="h-full col-span-3 gap-8 grid grid-cols-3">
           {rows.map((card) => (
-            <div className="md:border rounded-15 p-8 h-full border-gray-200 col-span-3 md:col-span-1 flex flex-col justify-between">
+            <div
+              key={card.content}
+              className="md:border rounded-15 p-8 h-full border-gray-200 col-span-3 md:col-span-1 flex flex-col justify-between"
+            >
               <div className="font-bold text-center md:text-left">
                 {card.content}
               </div>
               <div className="relative pt-1 ">
                 <div className="flex mb-2 items-center justify-between">
                   {card.parsedPercentages.map((card) => (
-                    <div className="text-right">
+                    <div key={card.colour} className="text-right">
                       <span
                         className={`text-xs font-bold inline-block text-${card.colour}`}
                       >
@@ -147,8 +157,9 @@ export const InsightRow = ({ token }: { token: InsightToken }) => {
                   ))}
                 </div>
                 <div className="overflow-hidden h-5 mb-4 text-xs flex rounded bg-purple-200 ">
-                  {card.parsedPercentages.map((card) => (
+                  {card.parsedPercentages.map((card, index) => (
                     <div
+                      key={index}
                       style={{ width: card.formattedPercent }}
                       className={`shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-${card.colour}`}
                     ></div>
