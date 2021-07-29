@@ -110,7 +110,7 @@ export const SwapWidget = ({ isLimit, setIsLimit }: SwapWidgetProps) => {
 
   return (
     <Toggle.Provider value={toggle}>
-      <div className="flex  w-[1215px] mx-auto space-x-20">
+      <div className="flex justify-center w-full mx-auto space-x-20">
         <div>
           <div className="widget">
             <SwapHeader
@@ -145,18 +145,7 @@ export const SwapWidget = ({ isLimit, setIsLimit }: SwapWidgetProps) => {
             ''
           )}
         </div>
-        {insightsIsVisible ? (
-          <Insight tokens={insightTokens} onClose={() => showInsights(false)} />
-        ) : (
-          <div>
-            <div className="p-20 mx-4 rounded rounded-2xl bg-white">
-              <IconLightbulb
-                className="w-[28px] h-[23px] dark:text-grey-4"
-                onClick={() => showInsights(true)}
-              />
-            </div>
-          </div>
-        )}
+        <Insight tokens={insightTokens} />
       </div>
     </Toggle.Provider>
   );

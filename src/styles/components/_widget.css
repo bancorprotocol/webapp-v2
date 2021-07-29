@@ -8,7 +8,7 @@
   }
 
   .widget-large {
-    @apply w-full p-10 md:rounded-30;
+    @apply w-full md:rounded-20;
     @apply bg-white md:shadow-widget;
     @apply dark:bg-blue-4 dark:shadow-none;
   }
