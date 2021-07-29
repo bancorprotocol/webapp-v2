@@ -14,6 +14,7 @@ import {
 import { Insight, InsightToken } from 'elements/insight/Insight';
 import { IntoTheBlock } from 'services/api/intoTheBlock';
 import { zip } from 'lodash';
+import { ReactComponent as IconLightbulb } from 'assets/icons/lightbulb.svg';
 
 export const Toggle = createContext(false);
 interface SwapWidgetProps {
@@ -33,6 +34,8 @@ export const SwapWidget = ({ isLimit, setIsLimit }: SwapWidgetProps) => {
   const [fromToken, setFromToken] = useState(tokens[0]);
   const [toToken, setToToken] = useState<Token | null>(null);
   const [toggle, setToggle] = useState(false);
+
+  const [showInsights, setShowInsights] = useState(false);
 
   const insightTokens = zip(
     [fromTokenIntoBlock, toTokenIntoBlock],
@@ -98,7 +101,7 @@ export const SwapWidget = ({ isLimit, setIsLimit }: SwapWidgetProps) => {
 
   return (
     <Toggle.Provider value={toggle}>
-      <div className="flex justify-between w-[1215px] mx-auto space-x-20">
+      <div className="flex  w-[1215px] mx-auto space-x-20">
         <div>
           <div className="widget">
             <SwapHeader
@@ -133,7 +136,21 @@ export const SwapWidget = ({ isLimit, setIsLimit }: SwapWidgetProps) => {
             ''
           )}
         </div>
-        <Insight tokens={insightTokens} />
+        {showInsights ? (
+          <Insight
+            tokens={insightTokens}
+            onClose={() => setShowInsights(false)}
+          />
+        ) : (
+          <div>
+            <div className="w-40 h-40 p-30 mx-4 rounded rounded-2xl bg-white ">
+              <IconLightbulb
+                className="w-[28px] h-[23px] dark:text-grey-4"
+                onClick={() => setShowInsights(true)}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </Toggle.Provider>
   );
