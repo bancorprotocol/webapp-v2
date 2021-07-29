@@ -36,7 +36,6 @@ import {
 import { useAppSelector } from 'redux/index';
 import { web3 } from 'services/web3/contracts';
 import { provider } from 'services/web3/wallet/connectors';
-import { Insight } from 'elements/insight/Insight';
 import { googleTagManager } from 'services/api/googleTagManager';
 
 export const App = () => {
@@ -45,6 +44,7 @@ export const App = () => {
   const [loading, setLoading] = useState(true);
   const unsupportedNetwork = isUnsupportedNetwork(chainId);
   const triedAutoLogin = useAutoConnect();
+  const [isSidebarMinimized, setIsSidebarMinimized] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const notifications = useAppSelector<Notification[]>(
     (state) => state.notification.notifications
@@ -95,37 +95,52 @@ export const App = () => {
   return (
     <BrowserRouter>
       <nav className={'hidden md:block'}>
-        <Sidebar />
+        <Sidebar
+          isMinimized={isSidebarMinimized}
+          setIsMinimized={setIsSidebarMinimized}
+        />
       </nav>
       <nav className={'md:hidden'}>
         <Slideover isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen}>
           <div className="w-full w-[200px]">
-            <Sidebar setIsSidebarOpen={setIsSidebarOpen} />
+            <Sidebar
+              isMinimized={isSidebarMinimized}
+              setIsMinimized={setIsSidebarMinimized}
+              setIsSidebarOpen={setIsSidebarOpen}
+            />
           </div>
         </Slideover>
       </nav>
 
-      <LayoutHeader setIsSidebarOpen={setIsSidebarOpen} />
+      <LayoutHeader
+        isMinimized={isSidebarMinimized}
+        setIsSidebarOpen={setIsSidebarOpen}
+      />
 
       {loading ? (
         <Loading />
       ) : unsupportedNetwork ? (
         <UnsupportedNetwork />
       ) : (
-        <main className="pt-[110px] md:pt-[165px]">
-          <Switch>
-            <Route exact strict path="/" component={Swap} />
-            <Route exact strict path="/insight" component={Insight} />
-            <Route exact strict path="/tokens" component={Tokens} />
-            <Route exact strict path="/pools" component={Pools} />
-            <Route exact strict path="/portfolio" component={Portfolio} />
-            <Route exact strict path="/governance" component={Governance} />
-            <Route exact strict path="/vote" component={Vote} />
-            <Route exact strict path="/fiat" component={Fiat} />
-            <Route exact strict path="/buttons" component={ButtonSamples} />
-            <Route component={NotFound} />
-          </Switch>
-        </main>
+        <div
+          className={`md:mr-[30px] pt-[110px] md:pt-[165px] transition-all duration-500 ${
+            isSidebarMinimized ? 'md:ml-[96px] ' : 'md:ml-[230px] '
+          }`}
+        >
+          <main className={`max-w-[1200px] mx-auto`}>
+            <Switch>
+              <Route exact strict path="/" component={Swap} />
+              <Route exact strict path="/tokens" component={Tokens} />
+              <Route exact strict path="/pools" component={Pools} />
+              <Route exact strict path="/portfolio" component={Portfolio} />
+              <Route exact strict path="/governance" component={Governance} />
+              <Route exact strict path="/vote" component={Vote} />
+              <Route exact strict path="/fiat" component={Fiat} />
+              <Route exact strict path="/buttons" component={ButtonSamples} />
+              <Route component={NotFound} />
+            </Switch>
+          </main>
+        </div>
       )}
       <NotificationAlerts />
     </BrowserRouter>
