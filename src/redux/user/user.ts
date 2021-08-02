@@ -36,21 +36,13 @@ const userSlice = createSlice({
     setLocale: (state, action) => {
       state.locale = action.payload;
     },
-    setShowInsights: (state, action) => {
-      state.showInsights = action.payload;
-    },
     openWalletModal: (state, action) => {
       state.walletModal = action.payload;
     },
   },
 });
 
-export const {
-  setDarkMode,
-  setSlippageTolerance,
-  setLocale,
-  openWalletModal,
-  setShowInsights,
-} = userSlice.actions;
+export const { setDarkMode, setSlippageTolerance, setLocale, openWalletModal } =
+  userSlice.actions;
 
 export const user = userSlice.reducer;

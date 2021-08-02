@@ -4,7 +4,7 @@ export const useLocalStorage = <T>(key: string, initialValue: T) => {
   const [storedValue, setStoredValue] = useState(() => {
     try {
       const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
+      return item ? (JSON.parse(item) as T) : initialValue;
     } catch (error) {
       console.log(error);
       return initialValue;
@@ -21,5 +21,5 @@ export const useLocalStorage = <T>(key: string, initialValue: T) => {
       console.log(error);
     }
   };
-  return [storedValue, setValue];
+  return [storedValue, setValue] as [T, (value: T) => void];
 };

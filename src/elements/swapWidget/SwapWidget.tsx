@@ -14,8 +14,6 @@ import {
 import { Insight, InsightToken } from 'elements/insight/Insight';
 import { IntoTheBlock } from 'services/api/intoTheBlock';
 import { zip } from 'lodash';
-import { setShowInsights } from 'redux/user/user';
-import { ReactComponent as IconLightbulb } from 'assets/icons/lightbulb.svg';
 
 export const Toggle = createContext(false);
 
@@ -31,10 +29,6 @@ export const SwapWidget = ({ isLimit, setIsLimit }: SwapWidgetProps) => {
   );
   const toTokenIntoBlock = useAppSelector<IntoTheBlock>(
     (state) => state.intoTheBlock.toToken
-  );
-
-  const insightsIsVisible = useAppSelector<boolean>(
-    (state) => state.user.showInsights
   );
 
   const [fromToken, setFromToken] = useState(tokens[0]);
@@ -101,11 +95,6 @@ export const SwapWidget = ({ isLimit, setIsLimit }: SwapWidgetProps) => {
       setFromToken(toToken);
       setToToken(fromToken);
     }
-  };
-
-  const showInsights = (status: boolean) => {
-    localStorage.setItem('showInsights', JSON.stringify(status));
-    dispatch(setShowInsights(status));
   };
 
   return (
