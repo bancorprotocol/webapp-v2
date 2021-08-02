@@ -3,7 +3,7 @@ import { ReactComponent as IconLightbulb } from 'assets/icons/lightbulb.svg';
 import { ReactComponent as IconIntotheblock } from 'assets/icons/intotheblock.svg';
 import { IntoTheBlock } from 'services/api/intoTheBlock';
 import { ReactComponent as IconTimes } from 'assets/icons/times.svg';
-import { useState } from 'react';
+import { useLocalStorage } from 'hooks/useLocalStorage';
 
 export interface InsightToken extends IntoTheBlock {
   image: string;
@@ -11,7 +11,11 @@ export interface InsightToken extends IntoTheBlock {
 }
 
 export const Insight = ({ tokens }: { tokens: InsightToken[] }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useLocalStorage(
+    'insightsExpanded',
+    false
+  );
+
   return (
     <div
       className={`widget-large mx-auto overflow-hidden transition-all duration-1000 ease-in-out ${
