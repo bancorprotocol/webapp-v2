@@ -18,11 +18,11 @@ interface Progress {
 const matchColour = (colour: Colour): string => {
   switch (colour) {
     case Colour.Blue:
-      return 'blue-500';
+      return 'primary';
     case Colour.Green:
       return 'green-500';
     case Colour.Grey:
-      return 'gray-800';
+      return 'gray-3';
     case Colour.Red:
       return 'red-500';
     default:
@@ -34,14 +34,21 @@ export const InsightRow = ({ token }: { token: InsightToken }) => {
   const remainingConcentration = 1 - token.concentration;
 
   const cards: { label: string; percentages: Progress[] }[] = [
-    {
-      label: 'Holders making money at the current price',
-      percentages: [
-        { colour: Colour.Green, decPercent: token.inOutOfTheMoney.in },
-        { colour: Colour.Grey, decPercent: token.inOutOfTheMoney.between },
-        { colour: Colour.Red, decPercent: token.inOutOfTheMoney.out },
-      ],
-    },
+    ...(token.inOutOfTheMoney
+      ? [
+          {
+            label: 'Holders making money at the current price',
+            percentages: [
+              { colour: Colour.Green, decPercent: token.inOutOfTheMoney.in },
+              {
+                colour: Colour.Grey,
+                decPercent: token.inOutOfTheMoney.between,
+              },
+              { colour: Colour.Red, decPercent: token.inOutOfTheMoney.out },
+            ],
+          },
+        ]
+      : [{ label: 'No available insights', percentages: [] }]),
     {
       label: 'Concentration by large holders',
       percentages: [
@@ -69,7 +76,12 @@ export const InsightRow = ({ token }: { token: InsightToken }) => {
             ],
           },
         ]
-      : []),
+      : [
+          {
+            label: 'No available insights',
+            percentages: [],
+          },
+        ]),
   ];
 
   const rows = cards.map((colour) => ({
@@ -94,8 +106,10 @@ export const InsightRow = ({ token }: { token: InsightToken }) => {
     rotation > 110
       ? 'text-green-500'
       : rotation > 70
-      ? 'text-grey-500'
+      ? 'text-grey-3'
       : 'text-error';
+
+  console.log(cards);
 
   return (
     <div className="grid grid-cols-9 justify-between py-24 px-4 gap-x-40 border-t">
@@ -112,25 +126,19 @@ export const InsightRow = ({ token }: { token: InsightToken }) => {
             <div className="font-bold text-2xl sm:text-3xl md:text-base text-error">
               {token.summary.bearish}
             </div>
-            <div className="font-bold text-2xl sm:text-3xl md:text-base">
-              Bearish
-            </div>
+            <div className=" text-2xl sm:text-3xl md:text-base">Bearish</div>
           </div>
           <div>
             <div className="font-bold text-2xl sm:text-3xl md:text-base text-gray-500">
               {token.summary.neutral}
             </div>
-            <div className="font-bold text-2xl sm:text-3xl md:text-base">
-              Neutral
-            </div>
+            <div className=" text-2xl sm:text-3xl md:text-base">Neutral</div>
           </div>
           <div>
             <div className="font-bold text-2xl sm:text-3xl md:text-base text-green-500 ">
               {token.summary.bullish}
             </div>
-            <div className="font-bold text-2xl sm:text-3xl md:text-base">
-              Bullish
-            </div>
+            <div className=" text-2xl sm:text-3xl md:text-base">Bullish</div>
           </div>
         </div>
       </div>
@@ -162,21 +170,24 @@ export const InsightRow = ({ token }: { token: InsightToken }) => {
                   {card.parsedPercentages.map((card) => (
                     <div key={card.colour} className="text-right">
                       <span
-                        className={`text-xs font-bold inline-block text-${card.colour}`}
+                        className={`text-xs  inline-block text-${card.colour}`}
                       >
                         {card.formattedPercent}
                       </span>
                     </div>
                   ))}
                 </div>
-                <div className="overflow-hidden h-5 mb-4 text-xs flex rounded bg-purple-200 ">
-                  {card.parsedPercentages.map((card, index) => (
-                    <div
-                      key={index}
-                      style={{ width: card.formattedPercent }}
-                      className={`shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-${card.colour}`}
-                    ></div>
-                  ))}
+
+                <div>
+                  <div className="overflow-hidden h-5 mb-4 text-xs flex rounded text-blue-4 bg-grey-3">
+                    {card.parsedPercentages.map((card, index) => (
+                      <div
+                        key={index}
+                        style={{ width: card.formattedPercent }}
+                        className={`shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-${card.colour}`}
+                      ></div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>

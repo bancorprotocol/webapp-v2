@@ -22,7 +22,7 @@ interface Thresholds {
 
 interface OverviewRes {
   concentration: number;
-  inOutOfTheMoney: InOutOfTheMoney;
+  inOutOfTheMoney?: InOutOfTheMoney;
   byTimeHeldComposition?: ByTimeHeldComposition;
 }
 
@@ -40,7 +40,7 @@ interface ByTimeHeldComposition {
 
 export interface IntoTheBlock {
   summary: Summary;
-  inOutOfTheMoney: InOutOfTheMoney;
+  inOutOfTheMoney?: InOutOfTheMoney;
   concentration: number;
   byTimeHeldComposition?: ByTimeHeldComposition;
   symbol: string;
@@ -60,6 +60,15 @@ const calculateTimeHeld = (timeHeld: ByTimeHeldComposition) => {
   return byTimeHeldComposition;
 };
 
+const calculateInOut = (inOut: InOutOfTheMoney) => {
+  const sumInOut = inOut.in + inOut.between + inOut.out;
+  return {
+    in: inOut.in / sumInOut,
+    between: inOut.between / sumInOut,
+    out: inOut.out / sumInOut,
+  };
+};
+
 export const intoTheBlockByToken = async (
   symbol: string
 ): Promise<IntoTheBlock | undefined> => {
@@ -72,17 +81,13 @@ export const intoTheBlockByToken = async (
     const timeHeld = overview.data.byTimeHeldComposition;
 
     const byTimeHeldComposition = timeHeld && calculateTimeHeld(timeHeld);
+    const inOutOfTheMoney = inOut && calculateInOut(inOut);
 
-    const sumInOut = inOut.in + inOut.between + inOut.out;
     return {
       summary: signal.data.summary,
       symbol,
-      inOutOfTheMoney: {
-        in: inOut.in / sumInOut,
-        between: inOut.between / sumInOut,
-        out: inOut.out / sumInOut,
-      },
       concentration: overview.data.concentration,
+      ...(inOutOfTheMoney && { inOutOfTheMoney }),
       ...(byTimeHeldComposition && { byTimeHeldComposition }),
     };
   } catch (error) {

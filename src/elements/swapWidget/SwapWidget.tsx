@@ -39,11 +39,12 @@ export const SwapWidget = ({ isLimit, setIsLimit }: SwapWidgetProps) => {
     [fromTokenIntoBlock, toTokenIntoBlock],
     [fromToken, toToken]
   )
-    .filter(([intoTheBlock, api]) => api && intoTheBlock && api.logoURI)
+    .filter(([intoTheBlock, api]) => api && api.logoURI)
     .map(
       ([intoTheBlock, api]): InsightToken =>
         ({
           ...intoTheBlock,
+          symbol: api!.symbol,
           price: Number(api?.usdPrice) || 0,
           image: api?.logoURI || '',
         } as InsightToken)

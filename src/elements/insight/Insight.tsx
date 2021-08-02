@@ -16,6 +16,8 @@ export const Insight = ({ tokens }: { tokens: InsightToken[] }) => {
     false
   );
 
+  console.log(tokens, 'are the tokens length');
+
   return (
     <div
       className={`widget-large mx-auto overflow-hidden transition-all duration-1000 ease-in-out ${
