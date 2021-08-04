@@ -1,6 +1,11 @@
 import { bancorNetwork$ } from 'services/observables/contracts';
 import { Token } from 'services/observables/tokens';
-import { expandToken, shrinkToken, splitArrayByVal } from 'utils/pureFunctions';
+import {
+  expandToken,
+  findOrThrow,
+  shrinkToken,
+  splitArrayByVal,
+} from 'utils/pureFunctions';
 import { resolveTxOnConfirmation } from 'services/web3';
 import { web3, writeWeb3 } from 'services/web3/contracts';
 import {
@@ -211,10 +216,9 @@ const ppmToDec = (ppm: string) => new BigNumber(ppm).div(oneMillion);
 const findPoolByToken = async (tkn: string): Promise<Pool> => {
   const apiData = await apiData$.pipe(take(1)).toPromise();
 
-  const pool = apiData.pools.find(
-    (x) => x && x.reserves.find((x) => x.address === tkn)
+  return findOrThrow(
+    apiData.pools,
+    (x) => x && x.reserves.find((x) => x.address === tkn),
+    'No pool found'
   );
-  if (pool) return pool;
-
-  throw new Error('No pool found');
 };
