@@ -12,6 +12,7 @@ import { Modal } from 'components/modal/Modal';
 import { Switch } from '@headlessui/react';
 import { getLSTokenList, setLSTokenList } from 'services/observables/triggers';
 import { prettifyNumber } from 'utils/helperFunctions';
+import { sortByBalanceAndAlphabetic } from 'utils/pureFunctions';
 import wait from 'waait';
 import { Image } from 'components/image/Image';
 import { ReactComponent as IconEdit } from 'assets/icons/edit.svg';
@@ -149,6 +150,7 @@ export const SearchableTokenList = ({
                   (token.symbol.toLowerCase().includes(search.toLowerCase()) ||
                     token.name.toLowerCase().includes(search.toLowerCase()))
               )
+              .sort(sortByBalanceAndAlphabetic)
               .map((token) => {
                 return (
                   <button

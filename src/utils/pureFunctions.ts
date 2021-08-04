@@ -152,3 +152,21 @@ export const splitArrayByVal = <T>(
     [[], []]
   );
 };
+
+export const sortByBalanceAndAlphabetic = (a: Token, b: Token) => {
+  if (a.balance && b.balance && b.balance !== '0' && a.balance !== '0') {
+    return Number(b.balance) - Number(a.balance);
+  } else if (a.balance && a.balance !== '0') {
+    return -1;
+  } else if (b.balance && b.balance !== '0') {
+    return 1;
+  } else {
+    if (a.symbol < b.symbol) {
+      return -1;
+    } else if (a.symbol > b.symbol) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+};
