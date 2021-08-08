@@ -49,3 +49,7 @@ export const loadSwapData = (dispatch: any) => {
 export const loadTokenData = (dispatch: any) => {
   loadCommonData(dispatch);
 };
+
+export const loadPoolData = (dispatch: any) => {
+  loadCommonData(dispatch);
+};
