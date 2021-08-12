@@ -45,6 +45,7 @@
     "react-scripts": "4.0.3",
     "rxjs": "6.6.7",
     "source-map-explorer": "^2.5.2",
+    "vconsole": "^3.9.1",
     "waait": "^1.0.5",
     "web-vitals": "^1.0.1",
     "web3": "^1.5.0"
