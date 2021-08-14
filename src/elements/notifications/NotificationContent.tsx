@@ -14,6 +14,7 @@ import updateLocale from 'dayjs/plugin/updateLocale';
 import { useWeb3React } from '@web3-react/core';
 import { getNetworkVariables } from 'services/web3/config';
 import { EthNetworks } from 'services/web3/types';
+import { useTimer } from 'hooks/useTimer';
 
 dayjs.extend(relativeTime);
 dayjs.extend(updateLocale);
@@ -49,14 +50,23 @@ export const NotificationContent = ({
 }: NotificationContentProps) => {
   const { id, type, title, msg, showSeconds, timestamp, txHash } = data;
   const [isHovering, setIsHovering] = useState(false);
+  const timerEnabled = !!isAlert && type !== NotificationType.pending;
+  
+  const { stopTimer, resumeTimer } = useTimer({
+    timeoutInSeconds: showSeconds!,
+    onTimerOver: onRemove,
+    autoStart: timerEnabled,
+  });
 
-  useEffect(() => {
-    if (!isAlert) return;
-    if (type === NotificationType.pending) return;
-    setTimeout(() => {
-      onRemove(id);
-    }, showSeconds! * 1000);
-  }, [isAlert, onRemove, type, showSeconds, id]);
+  const onMouseEnter = () => {
+    setIsHovering(true);
+    if (timerEnabled) stopTimer();
+  }
+
+  const onMouseLeave = () => {
+    setIsHovering(false);
+    if (timerEnabled) resumeTimer();
+  }
 
   const StatusIcon = () => {
     switch (type) {
@@ -89,8 +99,8 @@ export const NotificationContent = ({
 
   return (
     <div
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       className="text-12"
     >
       <div className="flex justify-between items-center mb-4">
