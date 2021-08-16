@@ -29,7 +29,6 @@ export const depositWeth = async (amount: string, user: string) => {
     value: wei,
     tx,
     user,
-    gas: estimatedGas * manualBuffer,
     resolveImmediately: true,
   });
 
