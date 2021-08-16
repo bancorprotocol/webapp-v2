@@ -26,7 +26,6 @@ export const determineTxGas = async (
 
 export const resolveTxOnConfirmation = async ({
   tx,
-  gas,
   value,
   resolveImmediately = false,
   user,
@@ -35,24 +34,15 @@ export const resolveTxOnConfirmation = async ({
 }: {
   tx: ContractSendMethod;
   value?: string;
-  gas?: number;
   resolveImmediately?: boolean;
   user: string;
   onHash?: (hash: string) => void;
   onConfirmation?: (hash: string) => void;
 }): Promise<string> => {
-  let adjustedGas: number | boolean = false;
-  if (gas) adjustedGas = gas;
-  else
-    try {
-      adjustedGas = await determineTxGas(tx, user);
-    } catch (e) {}
-
   return new Promise((resolve, reject) => {
     let txHash: string;
     tx.send({
       from: user,
-      ...(adjustedGas && { gas: adjustedGas as number }),
       ...(value && { value: toHex(value) }),
     })
       .on('transactionHash', (hash: string) => {
