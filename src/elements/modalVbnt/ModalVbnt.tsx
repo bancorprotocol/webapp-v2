@@ -1,5 +1,5 @@
 import { Modal } from 'components/modal/Modal';
-import { SwapSwitch } from 'elements/swapSwitch/SwapSwitch';
+import { SwapSwitch } from 'elements/trade/swap/swapSwitch/SwapSwitch';
 import { useMemo, useState } from 'react';
 import { Token } from 'services/observables/tokens';
 import { TokenInputField } from 'components/tokenInputField/TokenInputField';

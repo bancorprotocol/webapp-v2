@@ -1,8 +1,8 @@
 import { prettifyNumber } from 'utils/helperFunctions';
-import { Speedometer } from './Speedometer';
+import { Speedometer } from 'elements/trade/swap/swapInsights/Speedometer';
 import { IntoTheBlock } from 'services/api/intoTheBlock';
 import { Token } from 'services/observables/tokens';
-import { InsightCard } from 'elements/swapInsights/InsightCard';
+import { InsightCard } from 'elements/trade/swap/swapInsights/InsightCard';
 
 export const InsightRow = ({
   token,

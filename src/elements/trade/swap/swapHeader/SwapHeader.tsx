@@ -1,6 +1,6 @@
 import { classNameGenerator } from 'utils/pureFunctions';
-import 'elements/swapHeader/SwapHeader.css';
-import { SwapSwitch } from 'elements/swapSwitch/SwapSwitch';
+import 'elements/trade/swap/swapHeader/SwapHeader.css';
+import { SwapSwitch } from 'elements/trade/swap/swapSwitch/SwapSwitch';
 
 interface SwapHeaderProps {
   isLimit: boolean;

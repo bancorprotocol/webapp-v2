@@ -1,4 +1,4 @@
-import { InsightRow } from './InsightRow';
+import { InsightRow } from 'elements/trade/swap/swapInsights/InsightRow';
 import { ReactComponent as IconLightbulb } from 'assets/icons/lightbulb.svg';
 import { ReactComponent as IconIntotheblock } from 'assets/icons/intotheblock.svg';
 import { IntoTheBlock } from 'services/api/intoTheBlock';

@@ -1,7 +1,7 @@
 import { Switch } from '@headlessui/react';
 import { ReactComponent as IconCoins } from 'assets/icons/coins.svg';
 import { ReactComponent as IconDollar } from 'assets/icons/dollar.svg';
-import 'elements/swapSwitch/SwapSwitch.css';
+import 'elements/trade/swap/swapSwitch/SwapSwitch.css';
 import { useAppSelector } from 'redux/index';
 import { useDispatch } from 'react-redux';
 import { setUsdToggle } from 'redux/user/user';

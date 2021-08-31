@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
-import { SwapHeader } from 'elements/swapHeader/SwapHeader';
-import { SwapMarket } from 'elements/swapMarket/SwapMarket';
-import { SwapLimit } from 'elements/swapLimit/SwapLimit';
+import { SwapHeader } from 'elements/trade/swap/swapHeader/SwapHeader';
+import { SwapMarket } from 'elements/trade/swap/swapMarket/SwapMarket';
+import { SwapLimit } from 'elements/trade/swap/swapLimit/SwapLimit';
 import { Token } from 'services/observables/tokens';
 import { useAppSelector } from 'redux/index';
 import { ethToken, wethToken } from 'services/web3/config';
 import { useDispatch } from 'react-redux';
 import { loadSwapData } from 'services/observables/triggers';
-import { Insight } from 'elements/swapInsights/Insight';
+import { Insight } from 'elements/trade/swap/swapInsights/Insight';
 import { IntoTheBlock, intoTheBlockByToken } from 'services/api/intoTheBlock';
 import { useAsyncEffect } from 'use-async-effect';
 
