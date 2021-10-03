@@ -19,7 +19,7 @@ export const PoolsTableCellRewards = (pool: Pool) => {
         }
         button={<IconClock className="w-10" />}
       />
-      <div className="flex justify-center w-full">
+      {/* <div className="flex justify-center w-full">
         <span className="text-right w-full">{`${symbolOne} ${aprOne.toFixed(
           2
         )}%`}</span>
@@ -27,7 +27,7 @@ export const PoolsTableCellRewards = (pool: Pool) => {
         <span className="text-left w-full">{`${symbolTwo} ${aprTwo.toFixed(
           2
         )}%`}</span>
-      </div>
+      </div> */}
     </div>
   ) : (
     ''

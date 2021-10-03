@@ -64,6 +64,15 @@ export const PoolsTable = ({ search, setSearch }: Props) => {
         sortDescFirst: true,
       },
       {
+        id: 'apr',
+        Header: 'APR',
+        accessor: 'apr',
+        Cell: (cellData) => `${cellData.value.toFixed(2)}%`,
+        minWidth: 80,
+        sortDescFirst: true,
+        tooltip: '24h fees annualized divided by liquidity in the pool. ',
+      },
+      {
         id: 'rewards',
         Header: 'Rewards',
         accessor: 'reward',
@@ -72,15 +81,6 @@ export const PoolsTable = ({ search, setSearch }: Props) => {
         disableSortBy: true,
         tooltip:
           'Estimated APR based on the maximum (2x multiplier) weekly BNT Liquidity Mining rewards. Counter indicates time until 12-week rewards cycle concludes.',
-      },
-      {
-        id: 'apr',
-        Header: 'APR',
-        accessor: 'apr',
-        Cell: (cellData) => `${cellData.value.toFixed(2)}%`,
-        minWidth: 80,
-        sortDescFirst: true,
-        tooltip: '24h fees annualized divided by liquidity in the pool. ',
       },
       {
         id: 'actions',
