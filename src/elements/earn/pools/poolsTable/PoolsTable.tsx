@@ -9,6 +9,7 @@ import { useAppSelector } from 'redux/index';
 import { PoolsTableCellName } from 'elements/earn/pools/poolsTable/PoolsTableCellName';
 import { PoolsTableCellRewards } from 'elements/earn/pools/poolsTable/PoolsTableCellRewards';
 import { PoolsTableCellActions } from 'elements/earn/pools/poolsTable/PoolsTableCellActions';
+import { PoolsTableCellApr } from 'elements/earn/pools/poolsTable/PoolsTableCellApr';
 
 interface Props {
   search: string;
@@ -64,15 +65,6 @@ export const PoolsTable = ({ search, setSearch }: Props) => {
         sortDescFirst: true,
       },
       {
-        id: 'apr',
-        Header: 'APR',
-        accessor: 'apr',
-        Cell: (cellData) => `${cellData.value.toFixed(2)}%`,
-        minWidth: 80,
-        sortDescFirst: true,
-        tooltip: '24h fees annualized divided by liquidity in the pool. ',
-      },
-      {
         id: 'rewards',
         Header: 'Rewards',
         accessor: 'reward',
@@ -80,7 +72,16 @@ export const PoolsTable = ({ search, setSearch }: Props) => {
         minWidth: 250,
         disableSortBy: true,
         tooltip:
-          'Estimated APR based on the maximum (2x multiplier) weekly BNT Liquidity Mining rewards. Counter indicates time until 12-week rewards cycle concludes.',
+          'Active indicates a current liquidity mining program on the pool.',
+      },
+      {
+        id: 'apr',
+        Header: 'APR',
+        accessor: 'apr',
+        Cell: (cellData) => PoolsTableCellApr(cellData.row.original),
+        minWidth: 80,
+        sortDescFirst: true,
+        tooltip: 'Estimated based on the maximum BNT Liquidity Mining rewards multiplier (2x) and annualized trading fees. ',
       },
       {
         id: 'actions',
