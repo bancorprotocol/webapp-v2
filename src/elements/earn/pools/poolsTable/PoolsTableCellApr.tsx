@@ -9,9 +9,9 @@ export const PoolsTableCellApr = (pool: Pool) => {
   return (
     <div className="flex items-center w-full">
       <div className="flex justify-start w-full">
-        <span className="">{`${symbolTwo} ${formatApr(aprTwo)}%`}</span>
+        <span className="text-right w-full">{`${symbolOne} ${formatApr(aprOne)}%`}</span>
         <span className="text-center px-10">|</span>
-        <span className="">{`${symbolOne} ${formatApr(aprOne)}%`}</span>
+        <span className="text-left w-full">{`${symbolTwo} ${formatApr(aprTwo)}%`}</span>
       </div>
     </div>
   );
