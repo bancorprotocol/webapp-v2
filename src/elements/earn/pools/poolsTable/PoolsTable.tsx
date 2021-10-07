@@ -78,6 +78,7 @@ export const PoolsTable = ({ search, setSearch }: Props) => {
         id: 'apr',
         Header: 'APR',
         accessor: 'apr',
+        headerClassName: 'justify-center',
         Cell: (cellData) => PoolsTableCellApr(cellData.row.original),
         minWidth: 250,
         sortDescFirst: true,
