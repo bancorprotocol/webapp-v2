@@ -9,10 +9,10 @@ export const PoolsTableCellApr = (pool: Pool) => {
   const formatApr = (rewardApr: number) => (rewardApr + pool.apr).toFixed(2);
   return aprOne && aprTwo && ends_at ? (
     <div className="flex items-center w-full">
-      <div className="flex justify-center w-full">
-        <span className="text-right w-full">{`${symbolOne} ${formatApr(aprOne)}%`}</span>
+      <div className="flex justify-start w-full">
+        <span className="">{`${symbolTwo} ${formatApr(aprTwo)}%`}</span>
         <span className="text-center px-10">|</span>
-        <span className="text-left w-full">{`${symbolTwo} ${formatApr(aprTwo)}%`}</span>
+        <span className="">{`${symbolOne} ${formatApr(aprOne)}%`}</span>
       </div>
     </div>
   ) : (

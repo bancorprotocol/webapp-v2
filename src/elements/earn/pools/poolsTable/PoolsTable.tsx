@@ -69,7 +69,7 @@ export const PoolsTable = ({ search, setSearch }: Props) => {
         Header: 'Rewards',
         accessor: 'reward',
         Cell: (cellData) => PoolsTableCellRewards(cellData.row.original),
-        minWidth: 250,
+        minWidth: 100,
         disableSortBy: true,
         tooltip:
           'Active indicates a current liquidity mining program on the pool.',
@@ -79,7 +79,7 @@ export const PoolsTable = ({ search, setSearch }: Props) => {
         Header: 'APR',
         accessor: 'apr',
         Cell: (cellData) => PoolsTableCellApr(cellData.row.original),
-        minWidth: 80,
+        minWidth: 250,
         sortDescFirst: true,
         tooltip: 'Estimated based on the maximum BNT Liquidity Mining rewards multiplier (2x) and annualized trading fees. ',
       },
