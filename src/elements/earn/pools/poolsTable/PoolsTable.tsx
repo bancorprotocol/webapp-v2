@@ -3,7 +3,7 @@ import { prettifyNumber } from 'utils/helperFunctions';
 import { ReactComponent as IconProtected } from 'assets/icons/protected.svg';
 import { ReactComponent as IconSearch } from 'assets/icons/search.svg';
 import { useMemo } from 'react';
-import { SortingRule } from 'react-table';
+import { SortingRule, Row } from 'react-table';
 import { DataTable, TableColumn } from 'components/table/DataTable';
 import { useAppSelector } from 'redux/index';
 import { PoolsTableCellName } from 'elements/earn/pools/poolsTable/PoolsTableCellName';
@@ -70,7 +70,12 @@ export const PoolsTable = ({ search, setSearch }: Props) => {
         accessor: 'reward',
         Cell: (cellData) => PoolsTableCellRewards(cellData.row.original),
         minWidth: 100,
-        disableSortBy: true,
+        sortDescFirst: true,
+        sortType: (a: Row<Pool>, b: Row<Pool>, id: string) => {
+          if (!!a.values[id] && !b.values[id]) return 1;
+          if (!a.values[id] && !!b.values[id]) return -1;
+          return a.values['liquidity'] > b.values['liquidity'] ? 1 : -1;
+        },
         tooltip:
           'Active indicates a current liquidity mining program on the pool.',
       },
@@ -81,7 +86,7 @@ export const PoolsTable = ({ search, setSearch }: Props) => {
         headerClassName: 'justify-center',
         Cell: (cellData) => PoolsTableCellApr(cellData.row.original),
         minWidth: 250,
-        sortDescFirst: true,
+        disableSortBy: true,
         tooltip: 'Estimated based on the maximum BNT Liquidity Mining rewards multiplier (2x) and annualized trading fees. ',
       },
       {
