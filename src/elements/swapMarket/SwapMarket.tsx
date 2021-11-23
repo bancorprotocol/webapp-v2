@@ -62,7 +62,7 @@ export const SwapMarket = ({
 }: SwapMarketProps) => {
   const { chainId, account } = useWeb3React();
 
-  const [fromDebounce, setFromDebounce] = useDebounce('');
+  const [fromDebounce, setFromDebounce] = useDebounce(fromAmount);
   const [toAmount, setToAmount] = useState('');
   const [toAmountUsd, setToAmountUsd] = useState('');
   const [rate, setRate] = useState('');
