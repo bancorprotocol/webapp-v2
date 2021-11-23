@@ -26,21 +26,21 @@ interface MenuPrimaryProps {
 
 const menu: MenuItem[] = [
   {
-    label: 'Trade',
-    to: '/',
-    icon: <IconSync />,
-    subMenu: [
-      { label: 'Swap', to: '/' },
-      { label: 'Tokens', to: '/tokens' },
-    ],
-  },
-  {
     label: 'Earn',
     to: '/pools',
     icon: <IconEarn />,
     subMenu: [
       { label: 'Pools', to: '/pools' },
       { label: 'Portfolio', to: '/portfolio' },
+    ],
+  },
+  {
+    label: 'Trade',
+    to: '/',
+    icon: <IconSync />,
+    subMenu: [
+      { label: 'Swap', to: '/' },
+      { label: 'Tokens', to: '/tokens' },
     ],
   },
   {
@@ -77,8 +77,10 @@ export const MenuPrimary = ({
           x.subMenu.some((sub) => sub.to === location.pathname)
       )
     );
-    if (prevLocation?.pathname !== location.pathname)
+    if (prevLocation?.pathname !== location.pathname) {
       sendGTMPath(prevLocation?.pathname, location.pathname, darkMode);
+      window.scrollTo(0, 0);
+    }
   }, [location, darkMode, prevLocation]);
 
   return (

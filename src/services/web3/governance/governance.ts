@@ -1,4 +1,3 @@
-import { NotificationType } from 'redux/notification/notification';
 import { take } from 'rxjs/operators';
 import { networkVars$ } from 'services/observables/network';
 import { Token } from 'services/observables/tokens';
@@ -6,6 +5,7 @@ import { shrinkToken, expandToken } from 'utils/formulas';
 import { web3, writeWeb3 } from 'services/web3';
 import { ErrorCode } from '../types';
 import { Governance__factory } from '../abis/types';
+import dayjs from 'utils/dayjs';
 
 export const getStakedAmount = async (
   user: string,
@@ -74,14 +74,16 @@ export const unstakeAmount = async (
   }
 };
 
-//Remaining time in seconds
 export const getUnstakeTimer = async (user: string) => {
+  const now = dayjs().unix() * 1000;
   const networkVars = await networkVars$.pipe(take(1)).toPromise();
   const govContract = Governance__factory.connect(
     networkVars.governanceContractAddress,
     web3.provider
   );
   const locks = await govContract.voteLocks(user);
-  const timeInSeconds = Number(locks) - Date.now() / 1000;
-  return timeInSeconds < 0 ? 0 : timeInSeconds;
+  const time = Number(locks) * 1000;
+  if (time - now > 0) return time;
+
+  return undefined;
 };

@@ -94,7 +94,7 @@ export const useProtectedPositions = () => {
         Cell: (cellData) =>
           ProtectedPositionTableCellRoi(cellData.row.original),
         minWidth: 130,
-        sortDescFirst: true,
+        disableSortBy: true,
         headerClassName: 'justify-center',
         tooltip:
           'The ROI of your fully protected value vs. your initial stake.',
@@ -117,8 +117,8 @@ export const useProtectedPositions = () => {
       {
         id: 'expander',
         accessor: 'subRows',
-        minWidth: 50,
-        width: 50,
+        minWidth: 250,
+        width: 250,
         Cell: (cellData) => ProtectedPositionTableCellActions(cellData),
       },
     ],

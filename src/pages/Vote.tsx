@@ -1,7 +1,7 @@
 import { useWeb3React } from '@web3-react/core';
 import { ReactComponent as IconLink } from 'assets/icons/link.svg';
+import { CountdownTimer } from 'components/countdownTimer/CountdownTimer';
 import { ModalVbnt } from 'elements/modalVbnt/ModalVbnt';
-import { useInterval } from 'hooks/useInterval';
 import { useCallback, useState } from 'react';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
@@ -14,7 +14,7 @@ import {
   getUnstakeTimer,
 } from 'services/web3/governance/governance';
 import { EthNetworks } from 'services/web3/types';
-import { formatTime, prettifyNumber } from 'utils/helperFunctions';
+import { prettifyNumber } from 'utils/helperFunctions';
 
 interface VoteCardProps {
   title: string;
@@ -58,7 +58,7 @@ export const Vote = () => {
   const tokens = useAppSelector<Token[]>((state) => state.bancor.tokens);
   const [govToken, setGovToken] = useState<Token | undefined>();
   const [stakeAmount, setStakeAmount] = useState<string | undefined>();
-  const [unstakeTime, setUnstakeTime] = useState<number>(0);
+  const [unstakeTime, setUnstakeTime] = useState<number | undefined>();
   const [stakeModal, setStakeModal] = useState<boolean>(false);
   const [isStake, setIsStake] = useState<boolean>(false);
   const dispatch = useDispatch();
@@ -79,7 +79,7 @@ export const Vote = () => {
       setUnstakeTime(unstakeTimer);
       setStakeAmount(stakedAmount);
     } else {
-      setUnstakeTime(0);
+      setUnstakeTime(undefined);
       setStakeAmount(undefined);
     }
   }, [account, govToken]);
@@ -87,10 +87,6 @@ export const Vote = () => {
   useEffect(() => {
     refresh();
   }, [refresh]);
-
-  useInterval(() => {
-    if (unstakeTime !== 0) setUnstakeTime(unstakeTime - 1);
-  }, 1000);
 
   return (
     <div className="flex flex-col text-14 max-w-[1140px] md:mx-auto mx-20">
@@ -181,19 +177,24 @@ export const Vote = () => {
 
             <button
               className={`text-12 font-medium btn-sm rounded-10 max-w-[190px]  ${
-                unstakeTime !== 0 || !stakeAmount || Number(stakeAmount) === 0
+                !!unstakeTime || !stakeAmount || Number(stakeAmount) === 0
                   ? 'btn-outline-secondary text-grey-3 dark:bg-blue-3 dark:text-grey-3 dark:border-grey-3'
                   : 'btn-outline-primary border border-primary hover:border-primary-dark hover:bg-white hover:text-primary-dark dark:border-primary-light dark:hover:border-primary-light dark:hover:bg-blue-3 dark:hover:text-primary-light'
               }`}
               disabled={
-                unstakeTime !== 0 || !stakeAmount || Number(stakeAmount) === 0
+                !!unstakeTime || !stakeAmount || Number(stakeAmount) === 0
               }
               onClick={() => {
                 setIsStake(false);
                 setStakeModal(true);
               }}
             >
-              {unstakeTime !== 0 && formatTime(unstakeTime)} Unstake Tokens
+              {unstakeTime && (
+                <span className="mr-[3px]">
+                  <CountdownTimer date={unstakeTime} />
+                </span>
+              )}
+              Unstake Tokens
             </button>
           </div>
           <hr className="widget-separator md:transform md:rotate-90 md:w-[120px] my-0 ml-2" />
@@ -207,7 +208,7 @@ export const Vote = () => {
             </div>
 
             <a
-              href="https://app.bancor.network/eth/vote-legacy/"
+              href="https://etherscan.io/address/0x892f481bd6e9d7d26ae365211d9b45175d5d00e4"
               target="_blank"
               className="flex items-center text-primary dark:text-primary-light font-medium"
               rel="noreferrer"

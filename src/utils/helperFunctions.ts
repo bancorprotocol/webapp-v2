@@ -2,6 +2,7 @@ import BigNumber from 'bignumber.js';
 import numeral from 'numeral';
 import { EthNetworks } from 'services/web3/types';
 import dayjs from 'dayjs';
+import { shrinkToken } from './formulas';
 
 const oneMillion = new BigNumber(1000000);
 
@@ -42,9 +43,10 @@ export const formatDuration = (duration: plugin.Duration): string => {
   return sentence;
 };
 
-export const formatTime = (seconds: number): string => {
-  return new Date(seconds * 1000).toISOString().substr(11, 8);
-};
+export const formatTime = (ms: number, withDays: boolean = false): string =>
+  dayjs
+    .duration(ms)
+    .format(`${withDays ? 'M [Months] D [Days] ' : ''}HH[:]mm[:]ss`);
 
 export const getNetworkName = (network: EthNetworks): string => {
   switch (network) {
@@ -125,4 +127,16 @@ export const calculateProgressLevel = (
   const timeWaited = now - startTimeSeconds;
   return timeWaited / totalWaitingTime;
 };
+
+export const calculateAPR = (
+  roi: number | string | BigNumber,
+  magnitude: number | string | BigNumber
+) => ppmToDec(roi).minus(1).times(magnitude);
+
+export const calcUsdPrice = (
+  amount: number | string | BigNumber,
+  price: string | number | BigNumber | null,
+  decimals: number
+) => new BigNumber(shrinkToken(amount, decimals)).times(price ?? 0).toString();
+
 export const IS_IN_IFRAME = window.self !== window.top;

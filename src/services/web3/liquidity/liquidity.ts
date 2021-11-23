@@ -18,11 +18,14 @@ import { web3, writeWeb3 } from '..';
 import {
   ConverterRegistry__factory,
   Converter__factory,
+  LiquidityProtection,
+  LiquidityProtectionSettings,
   LiquidityProtectionSettings__factory,
   LiquidityProtectionSystemStore__factory,
   LiquidityProtection__factory,
 } from '../abis/types';
-import { bntToken, ethToken, zeroAddress } from '../config';
+import { MultiCall } from 'services/web3/multicall/multicall';
+import { bntToken, changeGas, ethToken, zeroAddress } from '../config';
 import { ErrorCode, EthNetworks, PoolType } from '../types';
 
 export const createPool = async (
@@ -103,11 +106,19 @@ export const addLiquidity = async (
   const ethAmount = amountsWei.find((amount) => amount.address === ethToken);
   const value = ethAmount?.weiAmount;
 
-  const tx = await contract.addLiquidity(
+  const estimate = await contract.estimateGas.addLiquidity(
     amountsWei.map(({ address }) => address),
     amountsWei.map(({ weiAmount }) => weiAmount),
     '1',
     { value }
+  );
+  const gasLimit = changeGas(estimate.toString());
+
+  const tx = await contract.addLiquidity(
+    amountsWei.map(({ address }) => address),
+    amountsWei.map(({ weiAmount }) => weiAmount),
+    '1',
+    { value, gasLimit }
   );
 
   return tx.hash;
@@ -172,11 +183,20 @@ export const addLiquiditySingle = async ({
     writeWeb3.signer
   );
   const fromIsEth = ethToken === token.address;
-  const tx = await contract.addLiquidity(
+
+  const estimate = await contract.estimateGas.addLiquidity(
     pool.pool_dlt_id,
     token.address,
     expandToken(amount, token.decimals),
     { value: fromIsEth ? expandToken(amount, 18) : undefined }
+  );
+  const gasLimit = changeGas(estimate.toString());
+
+  const tx = await contract.addLiquidity(
+    pool.pool_dlt_id,
+    token.address,
+    expandToken(amount, token.decimals),
+    { value: fromIsEth ? expandToken(amount, 18) : undefined, gasLimit }
   );
 
   return tx.hash;
@@ -311,4 +331,77 @@ export const fetchReserveBalances = async (
   ).toString();
 
   return { tknBalance, bntBalance };
+};
+
+export const buildReserveBalancesCall = (pool: Pool): MultiCall[] => {
+  const contract = Converter__factory.connect(
+    pool.converter_dlt_id,
+    web3.provider
+  );
+  const buildCall = (address: string): MultiCall => {
+    return {
+      contractAddress: contract.address,
+      interface: contract.interface,
+      methodName: 'getConnectorBalance',
+      methodParameters: [address],
+    };
+  };
+
+  return [
+    buildCall(pool.reserves[0].address),
+    buildCall(pool.reserves[1].address),
+  ];
+};
+
+export const buildPoolROICall = (
+  contract: LiquidityProtection,
+  poolToken: string,
+  reserveToken: string,
+  reserveAmount: string,
+  poolRateN: string,
+  poolRateD: string,
+  reserveRateN: string,
+  reserveRateD: string
+): MultiCall => ({
+  contractAddress: contract.address,
+  interface: contract.interface,
+  methodName: 'poolROI',
+  methodParameters: [
+    poolToken,
+    reserveToken,
+    reserveAmount,
+    poolRateN,
+    poolRateD,
+    reserveRateN,
+    reserveRateD,
+  ],
+});
+
+export const buildRemoveLiquidityReturnCall = (
+  contract: LiquidityProtection,
+  id: string,
+  portion: string,
+  removeTimestamp: number
+): MultiCall => {
+  return {
+    contractAddress: contract.address,
+    interface: contract.interface,
+    methodName: 'removeLiquidityReturn',
+    methodParameters: [id, portion, String(removeTimestamp)],
+  };
+};
+
+export const buildProtectionDelayCall = (
+  contract: LiquidityProtectionSettings
+): MultiCall[] => {
+  const buildCall = (methodName: string): MultiCall => {
+    return {
+      contractAddress: contract.address,
+      interface: contract.interface,
+      methodName: methodName,
+      methodParameters: [],
+    };
+  };
+
+  return [buildCall('minProtectionDelay'), buildCall('maxProtectionDelay')];
 };

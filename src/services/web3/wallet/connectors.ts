@@ -9,7 +9,7 @@ import { EthNetworks } from 'services/web3/types';
 
 const POLLING_INTERVAL = 15000;
 
-export const buildAlchemyUrl = (network: EthNetworks, wss: boolean = false) => {
+export const buildAlchemyUrl = (network: EthNetworks, wss: boolean = true) => {
   const net = EthNetworks.Mainnet === network ? 'mainnet' : 'ropsten';
   const id =
     network === EthNetworks.Mainnet
@@ -25,7 +25,7 @@ const RPC_URLS: { [chainId: number]: string } = {
   3: buildAlchemyUrl(EthNetworks.Ropsten),
 };
 
-const appName = 'phoenix';
+const appName = 'bancor';
 
 export const injected = new InjectedConnector({
   supportedChainIds: [1, 3, 4, 5, 42],
