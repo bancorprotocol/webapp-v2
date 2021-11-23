@@ -348,6 +348,7 @@ export const SwapLimit = ({
     )
       return `${toToken.symbol} token is not supported`;
 
+    if (!account) return 'Connect your wallet';
     return 'Trade';
   };
 
