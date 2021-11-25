@@ -82,6 +82,15 @@ export const AddLiquidityEmptyCTA = ({
   );
 
   const button = () => {
+    if (!account) {
+      if (amountBnt || amountTkn) {
+        return {
+          label: 'Connect Your Wallet',
+          disabled: false,
+          variant: 'btn-primary',
+        };
+      }
+    }
     if (errorMsg) {
       return { label: errorMsg, disabled: true, variant: 'btn-error' };
     }

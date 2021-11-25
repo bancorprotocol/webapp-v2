@@ -1,3 +1,4 @@
+import { useWeb3React } from '@web3-react/core';
 import { Token } from 'services/observables/tokens';
 import { TokenInputField } from 'components/tokenInputField/TokenInputField';
 import { useEffect, useState } from 'react';
@@ -32,7 +33,7 @@ export const AddLiquidityDualStakeAmount = ({
 }: Props) => {
   const [bntAmountUsd, setBntAmountUsd] = useState('');
   const [tknAmountUsd, setTknAmountUsd] = useState('');
-
+  const { account } = useWeb3React();
   const onBntAmountChange = (amount: string) => {
     setBntAmount(amount);
     if (amount === '') {
@@ -65,13 +66,17 @@ export const AddLiquidityDualStakeAmount = ({
 
   useEffect(() => {
     if (new BigNumber(bntAmount).gt(bnt.balance || 0)) {
-      setErrorBalanceBnt('Insufficient Balance');
+      account
+        ? setErrorBalanceBnt('Insufficient Balance')
+        : setErrorBalanceBnt('Connect Your Wallet');
     } else {
       setErrorBalanceBnt('');
     }
 
     if (new BigNumber(tknAmount).gt(tkn.balance || 0)) {
-      setErrorBalanceTkn('Insufficient Balance');
+      account
+        ? setErrorBalanceTkn('Insufficient Balance')
+        : setErrorBalanceTkn('Connect Your Wallet');
     } else {
       setErrorBalanceTkn('');
     }
@@ -82,6 +87,7 @@ export const AddLiquidityDualStakeAmount = ({
     tknAmount,
     tkn.balance,
     setErrorBalanceTkn,
+    account,
   ]);
 
   return (

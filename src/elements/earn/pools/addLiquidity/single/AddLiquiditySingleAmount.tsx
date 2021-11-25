@@ -1,3 +1,4 @@
+import { useWeb3React } from '@web3-react/core';
 import { Pool, Token } from 'services/observables/tokens';
 import { TokenInputField } from 'components/tokenInputField/TokenInputField';
 import { useEffect } from 'react';
@@ -25,13 +26,16 @@ export const AddLiquiditySingleAmount = ({
   errorMsg,
   setErrorMsg,
 }: Props) => {
+  const { account } = useWeb3React();
   useEffect(() => {
     if (new BigNumber(amount).gt(token.balance || 0)) {
-      setErrorMsg('Insufficient Balance');
+      account
+        ? setErrorMsg('Insufficient Balance')
+        : setErrorMsg('Connect Your Wallet');
     } else {
       setErrorMsg('');
     }
-  }, [amount, token.balance, setErrorMsg]);
+  }, [amount, token.balance, setErrorMsg, account]);
 
   return (
     <>

@@ -13,14 +13,23 @@ export const AddLiquiditySingleCTA = ({ onStart, amount, errorMsg }: Props) => {
   const { account } = useWeb3React();
 
   const button = () => {
+    if (!account && amount) {
+      return {
+        label: 'Connect your wallet',
+        disabled: false,
+        variant: 'btn-primary',
+      };
+    }
+
     if (errorMsg) {
       return { label: errorMsg, disabled: true, variant: 'btn-error' };
     }
+
     if (!amount) {
       return { label: 'Enter amount', disabled: true, variant: 'btn-primary' };
     } else {
       return {
-        label: 'Stake and Protect',
+        label: 'Trade',
         disabled: false,
         variant: 'btn-primary',
       };
