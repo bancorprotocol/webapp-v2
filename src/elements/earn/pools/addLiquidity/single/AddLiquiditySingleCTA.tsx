@@ -1,6 +1,7 @@
 import { useWeb3React } from '@web3-react/core';
 import { openWalletModal } from 'redux/user/user';
 import { useDispatch } from 'react-redux';
+import BigNumber from 'bignumber.js';
 
 interface Props {
   onStart: Function;
@@ -13,14 +14,24 @@ export const AddLiquiditySingleCTA = ({ onStart, amount, errorMsg }: Props) => {
   const { account } = useWeb3React();
 
   const button = () => {
+    const hasAmount = new BigNumber(amount).gt(0);
+    if (!account && hasAmount) {
+      return {
+        label: 'Connect your wallet',
+        disabled: false,
+        variant: 'btn-primary',
+      };
+    }
+
     if (errorMsg) {
       return { label: errorMsg, disabled: true, variant: 'btn-error' };
     }
-    if (!amount) {
+
+    if (!hasAmount) {
       return { label: 'Enter amount', disabled: true, variant: 'btn-primary' };
     } else {
       return {
-        label: 'Stake and Protect',
+        label: 'Trade',
         disabled: false,
         variant: 'btn-primary',
       };

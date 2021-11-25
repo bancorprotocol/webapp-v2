@@ -10,6 +10,7 @@ import {
 import { prettifyNumber } from 'utils/helperFunctions';
 import { ErrorCode } from 'services/web3/types';
 import { addLiquidity } from 'services/web3/liquidity/liquidity';
+import BigNumber from 'bignumber.js';
 
 interface Props {
   pool: Pool;
@@ -82,10 +83,22 @@ export const AddLiquidityEmptyCTA = ({
   );
 
   const button = () => {
+    const hasAmountBnt = new BigNumber(amountBnt).gt(0);
+    const hasAmountTkn = new BigNumber(amountTkn).gt(0);
+
+    if (!account) {
+      if (hasAmountBnt || hasAmountTkn) {
+        return {
+          label: 'Connect Your Wallet',
+          disabled: false,
+          variant: 'btn-primary',
+        };
+      }
+    }
     if (errorMsg) {
       return { label: errorMsg, disabled: true, variant: 'btn-error' };
     }
-    if (!amountBnt || !amountTkn) {
+    if (!hasAmountBnt || !hasAmountTkn) {
       return {
         label: 'Enter amount',
         disabled: true,
