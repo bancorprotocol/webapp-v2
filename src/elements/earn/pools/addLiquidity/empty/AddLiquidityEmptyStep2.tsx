@@ -2,6 +2,7 @@ import { Token } from 'services/observables/tokens';
 import { TokenInputField } from 'components/tokenInputField/TokenInputField';
 import { useEffect, useState } from 'react';
 import BigNumber from 'bignumber.js';
+import { useWeb3React } from '@web3-react/core';
 
 interface Props {
   bnt: Token;
@@ -34,7 +35,7 @@ export const AddLiquidityEmptyStep2 = ({
 }: Props) => {
   const [bntAmountUsd, setBntAmountUsd] = useState('');
   const [tknAmountUsd, setTknAmountUsd] = useState('');
-
+  const { account } = useWeb3React();
   useEffect(() => {
     setBntAmountUsd('');
     setTknAmountUsd('');
@@ -72,13 +73,17 @@ export const AddLiquidityEmptyStep2 = ({
 
   useEffect(() => {
     if (new BigNumber(bntAmount).gt(bnt.balance || 0)) {
-      setErrorBalanceBnt('Insufficient Balance');
+      account
+        ? setErrorBalanceBnt('Insufficient Balance')
+        : setErrorBalanceBnt('Connect Your Wallet');
     } else {
       setErrorBalanceBnt('');
     }
 
     if (new BigNumber(tknAmount).gt(tkn.balance || 0)) {
-      setErrorBalanceTkn('Insufficient Balance');
+      account
+        ? setErrorBalanceTkn('Insufficient Balance')
+        : setErrorBalanceTkn('Connect Your Wallet');
     } else {
       setErrorBalanceTkn('');
     }
@@ -89,6 +94,7 @@ export const AddLiquidityEmptyStep2 = ({
     tknAmount,
     tkn.balance,
     setErrorBalanceTkn,
+    account,
   ]);
 
   return (
