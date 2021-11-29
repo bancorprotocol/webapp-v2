@@ -75,6 +75,7 @@ export const SwapWidget = ({
         const hasTokenInAsset = blockAssets.find(
           (x) => x.symbol === fromToken.symbol
         );
+        setFromTokenITB(undefined);
         if (hasTokenInAsset) {
           const data = await intoTheBlockByToken(fromToken.symbol);
           if (isMounted()) {
@@ -92,6 +93,7 @@ export const SwapWidget = ({
         const hasTokenInAsset = blockAssets.find(
           (x) => x.symbol === toToken.symbol
         );
+        setToTokenITB(undefined);
         if (hasTokenInAsset) {
           const data = await intoTheBlockByToken(toToken.symbol);
           if (isMounted()) {
