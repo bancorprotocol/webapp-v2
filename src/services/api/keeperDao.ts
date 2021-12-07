@@ -127,14 +127,11 @@ export const swapLimit = async (
   }
 };
 
-export const getTxOrigin = async (): Promise<string> => {
-  const res = await getInfo();
-  return res.txOrigin;
-};
-const getInfo = async () => {
+export const getOrderDetails = async (): Promise<OrderDetails> => {
   const res = await axios.get(`${baseUrl}/info`);
   return res.data.result.orderDetails;
 };
+
 export interface KeeprDaoToken {
   address: string;
   chainId: number;
@@ -204,7 +201,7 @@ const orderResToLimit = async (
   });
 };
 
-export const sendOrders = async (rfqOrder: RfqOrderJson[]) => {
+export const sendOrders = async (rfqOrder: SignedRfqOrder[]) => {
   const url = `${baseUrl}/orders`;
 
   try {
@@ -295,33 +292,57 @@ export interface LimitOrder {
   filled: string;
   orderRes: OrderResponse;
 }
-export interface RfqOrderJson {
-  maker: string;
+
+export type OrderDetails = {
+  verifyingContract: string;
+  chainId: number;
+  txOrigin: string;
   taker: string;
+  pool: string;
+};
+
+export interface RfqOrder {
   makerToken: string;
   takerToken: string;
   makerAmount: string;
   takerAmount: string;
+  maker: string;
+  taker: string;
   txOrigin: string;
   pool: string;
   expiry: number;
-  salt: string;
-  chainId: number; // Ethereum Chain Id where the transaction is submitted.
-  verifyingContract: string; // Address of the contract where the transaction should be sent.
-  signature: string;
+  salt: number;
 }
 
-interface Signature {
+export interface Signature {
   signatureType: number;
   v: number;
   r: string;
   s: string;
 }
 
+export interface SignedRfqOrder {
+  makerToken: string;
+  takerToken: string;
+  makerAmount: string;
+  takerAmount: string;
+  maker: string;
+  taker: string;
+  txOrigin: string;
+  pool: string;
+  expiry: number;
+  salt: number;
+
+  chainId: number;
+  verifyingContract: string;
+  signature: Signature;
+}
+
 interface OrderResponse {
   order: Order;
   metaData: MetaData;
 }
+
 interface MetaData {
   orderHash: string;
   makerBalance_makerToken: number;

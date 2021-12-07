@@ -5,9 +5,10 @@ import { providers, Signer } from 'ethers';
 import { buildAlchemyUrl } from 'services/web3/wallet/connectors';
 
 export const web3 = {
-  provider: new providers.WebSocketProvider(
-    buildAlchemyUrl(EthNetworks.Mainnet)
-  ),
+  // Use MetaMask injected provider if available (unable to test locally with alchemy)
+  provider: window.ethereum
+    ? new Web3Provider(window.ethereum)
+    : new providers.WebSocketProvider(buildAlchemyUrl(EthNetworks.Mainnet)),
 };
 
 export const writeWeb3 = {

@@ -91,15 +91,22 @@ export const getNetworkContractApproval = async (
   amount: string,
   contract?: string
 ): Promise<boolean> => {
-  const BANCOR_NETWORK = await bancorNetwork$.pipe(take(1)).toPromise();
+  // If contract argument not provided, default to bancor
+  const spender = contract
+    ? contract
+    : await bancorNetwork$.pipe(take(1)).toPromise();
+
   const USER = await user$.pipe(take(1)).toPromise();
+
   const amountWei = expandToken(amount, token.decimals);
+
   const { isApprovalRequired } = await getApproval(
     token.address,
     USER,
-    contract ? contract : BANCOR_NETWORK,
+    spender,
     amountWei
   );
+
   return isApprovalRequired;
 };
 
