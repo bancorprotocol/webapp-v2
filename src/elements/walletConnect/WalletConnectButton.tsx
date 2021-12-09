@@ -7,6 +7,7 @@ export const WalletConnectButton = ({
   handleWalletButtonClick,
   account,
   ensName,
+  ensAvatarURL,
   selectedWallet,
 }: UseWalletConnect) => {
   const accountOrName = ensName ?? account;
@@ -21,7 +22,7 @@ export const WalletConnectButton = ({
     >
       {selectedWallet && account ? (
         <Image
-          src={selectedWallet.icon}
+          src={ensAvatarURL || selectedWallet.icon}
           alt="Wallet Logo"
           className="w-[22px]"
         />

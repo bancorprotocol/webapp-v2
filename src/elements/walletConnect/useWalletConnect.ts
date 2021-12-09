@@ -25,6 +25,7 @@ export interface UseWalletConnect {
   isError: boolean;
   account?: string | null;
   ensName?: string | null;
+  ensAvatarURL?: string | null;
   selectedWallet?: WalletInfo;
   SUPPORTED_WALLETS: WalletInfo[];
   title: string;
@@ -34,6 +35,7 @@ export interface UseWalletConnect {
 export const useWalletConnect = (): UseWalletConnect => {
   const { activate, deactivate, account, connector } = useWeb3React();
   const [ensName, setEnsName] = useState<string>();
+  const [ensAvatarURL, setEnsAvatarURL] = useState<string>();
   const [isPending, setIsPending] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
   const [selectedWallet, setSelectedWallet] = useState<WalletInfo>();
@@ -144,7 +146,7 @@ export const useWalletConnect = (): UseWalletConnect => {
     [connector, selectedWallet]
   );
 
-  //ENS name reverse resolution
+  // ENS name reverse resolution
   useAsyncEffect(async () => {
     if (account && web3.provider) {
       const ens = new ENS({
@@ -158,6 +160,18 @@ export const useWalletConnect = (): UseWalletConnect => {
       setEnsName(undefined);
     }
   }, [account, connector]);
+
+  // ENS avatar lookup
+  useAsyncEffect(async () => {
+    if (ensName) {
+      const network = 'mainnet';
+      setEnsAvatarURL(
+        `https://metadata.ens.domains/${network}/avatar/${ensName}`
+      );
+    } else {
+      setEnsAvatarURL(undefined);
+    }
+  }, [ensName]);
 
   const title = useMemo(
     () =>
@@ -179,6 +193,7 @@ export const useWalletConnect = (): UseWalletConnect => {
     isError,
     account,
     ensName,
+    ensAvatarURL,
     selectedWallet,
     SUPPORTED_WALLETS,
     title,
