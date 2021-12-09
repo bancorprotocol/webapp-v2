@@ -6,9 +6,13 @@ import { ReactComponent as IconWallet } from 'assets/icons/wallet.svg';
 export const WalletConnectButton = ({
   handleWalletButtonClick,
   account,
+  ensName,
   selectedWallet,
 }: UseWalletConnect) => {
-  const buttonText = account ? shortenString(account) : 'Connect Wallet';
+  const accountOrName = ensName ?? account;
+  const buttonText = accountOrName
+    ? shortenString(accountOrName)
+    : 'Connect Wallet';
 
   return (
     <button

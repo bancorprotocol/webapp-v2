@@ -5,6 +5,8 @@ export const shortenString = (
   separator = '...',
   toLength = 13
 ): string => {
+  if (string.length <= toLength) return string;
+
   const startEndLength = Math.floor((toLength - separator.length) / 2);
   const start = string.substring(0, startEndLength);
   const end = string.substring(string.length - startEndLength, string.length);

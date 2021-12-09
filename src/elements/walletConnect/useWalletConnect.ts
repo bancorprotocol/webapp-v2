@@ -2,9 +2,11 @@ import { useCallback, useMemo, useState } from 'react';
 import { SUPPORTED_WALLETS, WalletInfo } from 'services/web3/wallet/utils';
 import { sendWalletEvent, WalletEvents } from 'services/api/googleTagManager';
 import { setAutoLoginLS } from 'utils/localStorage';
-import { setSigner } from 'services/web3';
+import { setSigner, web3 } from 'services/web3';
 import { Web3Provider } from '@ethersproject/providers';
 import { useWeb3React } from '@web3-react/core';
+// @ts-ignore
+import ENS, { getEnsAddress } from '@ensdomains/ensjs';
 import useAsyncEffect from 'use-async-effect';
 import { isMobile } from 'react-device-detect';
 import { useAppSelector } from '../../redux';
@@ -22,6 +24,7 @@ export interface UseWalletConnect {
   isPending: boolean;
   isError: boolean;
   account?: string | null;
+  ensName?: string | null;
   selectedWallet?: WalletInfo;
   SUPPORTED_WALLETS: WalletInfo[];
   title: string;
@@ -30,6 +33,7 @@ export interface UseWalletConnect {
 
 export const useWalletConnect = (): UseWalletConnect => {
   const { activate, deactivate, account, connector } = useWeb3React();
+  const [ensName, setEnsName] = useState<string>();
   const [isPending, setIsPending] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
   const [selectedWallet, setSelectedWallet] = useState<WalletInfo>();
@@ -140,6 +144,21 @@ export const useWalletConnect = (): UseWalletConnect => {
     [connector, selectedWallet]
   );
 
+  //ENS name reverse resolution
+  useAsyncEffect(async () => {
+    if (account && web3.provider) {
+      const ens = new ENS({
+        provider: web3.provider,
+        ensAddress: getEnsAddress('1'),
+      });
+
+      const resolvedName = await ens.getName(account);
+      resolvedName && setEnsName(resolvedName.name);
+    } else {
+      setEnsName(undefined);
+    }
+  }, [account, connector]);
+
   const title = useMemo(
     () =>
       isError
@@ -159,6 +178,7 @@ export const useWalletConnect = (): UseWalletConnect => {
     isPending,
     isError,
     account,
+    ensName,
     selectedWallet,
     SUPPORTED_WALLETS,
     title,
