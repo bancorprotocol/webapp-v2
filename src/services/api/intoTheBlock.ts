@@ -24,6 +24,7 @@ interface OverviewRes {
   concentration: number;
   inOutOfTheMoney?: InOutOfTheMoney;
   byTimeHeldComposition?: ByTimeHeldComposition;
+  name?: string;
 }
 
 interface InOutOfTheMoney {
@@ -43,6 +44,12 @@ export interface IntoTheBlock {
   inOutOfTheMoney?: InOutOfTheMoney;
   concentration: number;
   byTimeHeldComposition?: ByTimeHeldComposition;
+  symbol: string;
+}
+
+export interface IntoTheBlockAsset {
+  id: number;
+  name: string;
   symbol: string;
 }
 
@@ -90,4 +97,13 @@ export const intoTheBlockByToken = async (
       ...(byTimeHeldComposition && { byTimeHeldComposition }),
     };
   } catch (error) {}
+};
+
+export const intoTheBlockAsset = async (): Promise<IntoTheBlockAsset[]> => {
+  try {
+    const asset = await axios.get<IntoTheBlockAsset[]>(`${baseUrl}/assets`);
+    return asset.data;
+  } catch (error) {
+    return [];
+  }
 };

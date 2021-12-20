@@ -6,7 +6,12 @@ import { Token } from 'services/observables/tokens';
 import { useAppSelector } from 'redux/index';
 import { ethToken } from 'services/web3/config';
 import { Insight } from 'elements/swapInsights/Insight';
-import { IntoTheBlock, intoTheBlockByToken } from 'services/api/intoTheBlock';
+import {
+  IntoTheBlock,
+  intoTheBlockByToken,
+  intoTheBlockAsset,
+  IntoTheBlockAsset,
+} from 'services/api/intoTheBlock';
 import { useAsyncEffect } from 'use-async-effect';
 import { useHistory } from 'react-router-dom';
 import {
@@ -32,7 +37,6 @@ export const SwapWidget = ({
   limit,
 }: SwapWidgetProps) => {
   const tokens = useAppSelector<Token[]>((state) => state.bancor.tokens);
-
   const ethOrFirst = useCallback(() => {
     const eth = tokens.find((x) => x.address === ethToken);
     return eth ? eth : tokens[0];
@@ -43,6 +47,8 @@ export const SwapWidget = ({
 
   const [fromTokenITB, setFromTokenITB] = useState<IntoTheBlock | undefined>();
   const [toTokenITB, setToTokenITB] = useState<IntoTheBlock | undefined>();
+  const [blockAssets, setBlockAssets] = useState<IntoTheBlockAsset[]>([]);
+
   const history = useHistory();
 
   useEffect(() => {
@@ -65,27 +71,48 @@ export const SwapWidget = ({
 
   useAsyncEffect(
     async (isMounted) => {
-      if (fromToken) {
-        const data = await intoTheBlockByToken(fromToken.symbol);
-        if (isMounted()) {
-          setFromTokenITB(data);
+      if (fromToken && blockAssets.length > 0) {
+        const hasTokenInAsset = blockAssets.find(
+          (x) => x.symbol === fromToken.symbol
+        );
+        setFromTokenITB(undefined);
+        if (hasTokenInAsset) {
+          const data = await intoTheBlockByToken(fromToken.symbol);
+          if (isMounted()) {
+            setFromTokenITB(data);
+          }
         }
       }
     },
-    [fromToken]
+    [fromToken, blockAssets]
   );
 
   useAsyncEffect(
     async (isMounted) => {
-      if (toToken) {
-        const data = await intoTheBlockByToken(toToken.symbol);
-        if (isMounted()) {
-          setToTokenITB(data);
+      if (toToken && blockAssets.length > 0) {
+        const hasTokenInAsset = blockAssets.find(
+          (x) => x.symbol === toToken.symbol
+        );
+        setToTokenITB(undefined);
+        if (hasTokenInAsset) {
+          const data = await intoTheBlockByToken(toToken.symbol);
+          if (isMounted()) {
+            setToTokenITB(data);
+          }
         }
       }
     },
-    [toToken]
+    [toToken, blockAssets]
   );
+
+  useAsyncEffect(async () => {
+    if (blockAssets.length === 0) {
+      const assets = await intoTheBlockAsset();
+      if (assets) {
+        setBlockAssets(assets);
+      }
+    }
+  }, [blockAssets]);
 
   return (
     <div className="bg-white dark:bg-blue-4 h-screen w-screen md:h-auto md:w-auto md:bg-grey-1 md:dark:bg-blue-3">
