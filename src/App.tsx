@@ -45,6 +45,7 @@ import { TermsOfUse } from './pages/TermsOfUse';
 import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { MarketingBanner } from './elements/marketingBanner/MarketingBanner';
 import { keepWSOpen } from 'services/web3';
+import { ExamplePage } from './pages/ExamplePage';
 
 export const App = () => {
   const dispatch = useDispatch();
@@ -214,6 +215,7 @@ export const App = () => {
                 path="/privacy-policy"
                 component={PrivacyPolicy}
               />
+              <Route exact strict path="/example" component={ExamplePage} />
               <Route component={NotFound} />
             </Switch>
           </main>

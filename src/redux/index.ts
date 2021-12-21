@@ -5,12 +5,22 @@ import { bancor } from 'redux/bancor/bancor';
 import { pool } from 'redux/bancor/pool';
 import { notification } from 'redux/notification/notification';
 import { liquidity } from './liquidity/liquidity';
+import { apiData } from './bancor2/apiData.slice';
+import { tokenLists } from './bancor2/tokenLists.slice';
+import { userData } from './bancor2/userData.slice';
 
 export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredPaths: ['bancor.tokens', 'bancor.tokenLists'],
+        ignoredPaths: [
+          'bancor.tokens',
+          'bancor.tokenLists',
+          'apiData.apiTokens',
+          'apiData.apiPools',
+          'tokenLists.tokenLists',
+          'userData.balances',
+        ],
       },
     }),
   reducer: {
@@ -19,6 +29,9 @@ export const store = configureStore({
     bancor,
     pool,
     liquidity,
+    apiData,
+    tokenLists,
+    userData,
   },
 });
 
