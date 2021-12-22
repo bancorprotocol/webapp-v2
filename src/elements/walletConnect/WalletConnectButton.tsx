@@ -1,5 +1,5 @@
 import { UseWalletConnect } from './useWalletConnect';
-import { shortenString } from 'utils/pureFunctions';
+import { shortenString, truncateString } from 'utils/pureFunctions';
 import { ReactComponent as IconWallet } from 'assets/icons/wallet.svg';
 import useENS from 'hooks/useENS';
 import Davatar from '@davatar/react';
@@ -11,7 +11,7 @@ export const WalletConnectButton = ({
 }: UseWalletConnect) => {
   const { ensName } = useENS(account || '');
   const buttonText = account
-    ? ensName || shortenString(account)
+    ? truncateString(ensName || '') || shortenString(account)
     : 'Connect Wallet';
 
   return (

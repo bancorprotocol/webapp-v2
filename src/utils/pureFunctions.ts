@@ -11,6 +11,14 @@ export const shortenString = (
   return start + separator + end;
 };
 
+export const truncateString = (string: string, toLength = 13): string => {
+  if (string.length > toLength) {
+    return string.slice(0, toLength) + '...';
+  } else {
+    return string;
+  }
+};
+
 export const classNameGenerator = (object: {
   [key: string]: unknown;
 }): string => {
