@@ -1,14 +1,18 @@
 import { UseWalletConnect } from './useWalletConnect';
 import { shortenString } from 'utils/pureFunctions';
-import { Image } from 'components/image/Image';
 import { ReactComponent as IconWallet } from 'assets/icons/wallet.svg';
+import useENS from 'hooks/useENS';
+import Davatar from '@davatar/react';
 
 export const WalletConnectButton = ({
   handleWalletButtonClick,
   account,
   selectedWallet,
 }: UseWalletConnect) => {
-  const buttonText = account ? shortenString(account) : 'Connect Wallet';
+  const { ensName } = useENS(account || '');
+  const buttonText = account
+    ? ensName || shortenString(account)
+    : 'Connect Wallet';
 
   return (
     <button
@@ -16,11 +20,7 @@ export const WalletConnectButton = ({
       onClick={() => handleWalletButtonClick()}
     >
       {selectedWallet && account ? (
-        <Image
-          src={selectedWallet.icon}
-          alt="Wallet Logo"
-          className="w-[22px]"
-        />
+        <Davatar size={20} address={account} generatedAvatarType="jazzicon" />
       ) : (
         <IconWallet className="text-primary dark:text-primary-light w-[22px]" />
       )}
