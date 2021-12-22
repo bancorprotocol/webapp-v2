@@ -1,12 +1,10 @@
 import { ethers } from 'ethers';
 import { useEffect, useState } from 'react';
+import { getProvider } from 'services/web3';
 import { EthNetworks } from 'services/web3/types';
-import { buildAlchemyUrl } from 'services/web3/wallet/connectors';
 
-const useENS = (address: string) => {
-  const provider = new ethers.providers.JsonRpcProvider(
-    buildAlchemyUrl(EthNetworks.Mainnet)
-  );
+const useENS = (address: string | null | undefined) => {
+  const provider = getProvider(EthNetworks.Mainnet);
   const [ensName, setENSName] = useState<string | null>(null);
 
   useEffect(() => {
