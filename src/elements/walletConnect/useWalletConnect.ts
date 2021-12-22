@@ -94,7 +94,7 @@ export const useWalletConnect = (): UseWalletConnect => {
           );
           await wait(500);
           setIsPending(false);
-        } catch (e) {
+        } catch (e: any) {
           console.error('failed to connect wallet. ', e.message);
           setIsError(true);
         }
