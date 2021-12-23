@@ -14,8 +14,8 @@ const useENS = (address: string | null | undefined) => {
         if (ensName) setENSName(ensName);
       }
     };
-    resolveENS();
-  }, [address]);
+    void resolveENS();
+  }, [address, provider]);
 
   return { ensName };
 };
