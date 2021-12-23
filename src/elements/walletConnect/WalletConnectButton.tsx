@@ -11,7 +11,7 @@ export const WalletConnectButton = ({
 }: UseWalletConnect) => {
   const { ensName } = useENS(account);
   const buttonText = account
-    ? truncateString(ensName) || shortenString(account)
+    ? truncateString(ensName) ?? shortenString(account)
     : 'Connect Wallet';
 
   return (
