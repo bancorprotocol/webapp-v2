@@ -14,11 +14,11 @@ export const shortenString = (
 export const truncateString = (
   string: string | null,
   toLength = 13
-): string => {
+): string | null => {
   if (string && string.length > toLength) {
     return string.slice(0, toLength) + '...';
   } else {
-    return string!;
+    return string;
   }
 };
 
