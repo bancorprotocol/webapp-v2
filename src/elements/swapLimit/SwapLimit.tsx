@@ -49,6 +49,10 @@ interface SwapLimitProps {
   toToken?: Token;
   setToToken: Function;
   switchTokens: Function;
+  fromAmount: string;
+  setFromAmount: Function;
+  fromAmountUsd: string;
+  setFromAmountUsd: Function;
 }
 
 export const SwapLimit = ({
@@ -57,13 +61,15 @@ export const SwapLimit = ({
   toToken,
   setToToken,
   switchTokens,
+  fromAmount,
+  setFromAmount,
+  fromAmountUsd,
+  setFromAmountUsd,
 }: SwapLimitProps) => {
   const dispatch = useDispatch();
   const { account, chainId } = useWeb3React();
-  const [fromAmount, setFromAmount] = useState('');
   const [toAmount, setToAmount] = useState('');
   const [toAmountUsd, setToAmountUsd] = useState('');
-  const [fromAmountUsd, setFromAmountUsd] = useState('');
   const [rate, setRate] = useState('');
   const [marketRate, setMarketRate] = useState(-1);
   const [percentage, setPercentage] = useState('');
@@ -112,7 +118,7 @@ export const SwapLimit = ({
         setFromAmountUsd(usdAmount);
       }
     },
-    [fromToken]
+    [fromToken, setFromAmount, setFromAmountUsd]
   );
   const calcTo = useCallback(
     (from: string, rate: string) => {
@@ -327,17 +333,29 @@ export const SwapLimit = ({
 
   const swapButtonText = () => {
     if (!toToken) return 'Select a token';
-    else if (
+
+    if (
       fromToken.address !== ethToken &&
       keeperDaoTokens.findIndex((x) => x.address === fromToken.address) === -1
     )
       return `${fromToken.symbol} token is not supported`;
+
     if (toToken.address === ethToken) return 'Please change ETH to WETH';
-    else if (
-      keeperDaoTokens.findIndex((x) => x.address === toToken.address) === -1
-    )
+
+    if (keeperDaoTokens.findIndex((x) => x.address === toToken.address) === -1)
       return `${toToken.symbol} token is not supported`;
 
+    if (
+      !fromAmount ||
+      !toAmount ||
+      !rate ||
+      new BigNumber(fromAmount).eq(0) ||
+      new BigNumber(toAmount).eq(0) ||
+      new BigNumber(rate).eq(0)
+    )
+      return 'Enter Amount';
+
+    if (!account) return 'Connect your wallet';
     return 'Trade';
   };
 
@@ -353,7 +371,6 @@ export const SwapLimit = ({
           setAmountUsd={setFromAmountUsd}
           onChange={(val: string) => {
             setFromAmount(val);
-            handleFieldChanged(Field.from, val, toAmount, rate);
           }}
           border
           selectable
