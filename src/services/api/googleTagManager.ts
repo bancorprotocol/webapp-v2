@@ -168,3 +168,24 @@ export const sendGTMPath = (
     ga_event: undefined,
   });
 };
+
+export enum LiquidityEvents {
+  click = 'Liquidity Click',
+  fail = 'Liquidity Failed',
+  success = 'Liquidity Success',
+}
+
+export const sendAddLiquidityEvent = (
+  event: LiquidityEvents,
+  event_category: 'Add' | 'Remove',
+  event_properties?: {}
+) => {
+  sendGTM({
+    event: 'CE ' + event,
+    event_properties: event_properties,
+    user_properties: undefined,
+    ga_event: {
+      category: event_category + ' Liquidity',
+    },
+  });
+};

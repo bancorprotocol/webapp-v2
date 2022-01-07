@@ -12,6 +12,13 @@ import {
 import { prettifyNumber } from 'utils/helperFunctions';
 import { useCallback } from 'react';
 import { useNavigation } from 'services/router';
+import {
+  LiquidityEvents,
+  sendAddLiquidityEvent,
+} from 'services/api/googleTagManager';
+import { EthNetworks } from 'services/web3/types';
+import BigNumber from 'bignumber.js';
+import { useAppSelector } from '../../../../../redux';
 
 interface Props {
   pool: Pool;
@@ -31,12 +38,31 @@ export const AddLiquidityEmptyCTA = ({
   errorMsg,
 }: Props) => {
   const dispatch = useDispatch();
-  const { account } = useWeb3React();
+  const { account, chainId } = useWeb3React();
   const { pushPortfolio } = useNavigation();
+  const fiatToggle = useAppSelector<boolean>((state) => state.user.usdToggle);
 
   const handleAddLiquidity = useCallback(async () => {
     const cleanTkn = prettifyNumber(amountTkn);
     const cleanBnt = prettifyNumber(amountBnt);
+    const gtmEvent = {
+      liquidity_type: 'Add Liquidity Empty',
+      liquidity_blockchain_network:
+        chainId === EthNetworks.Ropsten ? 'Ropsten' : 'MainNet',
+      liquidity_poolName: pool.name,
+      liquidity_tkn_symbol: tkn.symbol,
+      liquidity_tkn_amount: amountTkn,
+      liquidity_tkn_amount_usd: new BigNumber(amountTkn)
+        .times(tkn.usdPrice || 0)
+        .toString(),
+      liquidity_bnt_symbol: bnt.symbol,
+      liquidity_bnt_amount: amountBnt,
+      liquidity_bnt_amount_usd: new BigNumber(amountBnt)
+        .times(bnt.usdPrice || 0)
+        .toString(),
+      liquidity_input_type: fiatToggle ? 'Fiat' : 'Token',
+    };
+    sendAddLiquidityEvent(LiquidityEvents.click, 'Add', gtmEvent);
     await addLiquidity(
       amountBnt,
       bnt,
@@ -54,11 +80,22 @@ export const AddLiquidityEmptyCTA = ({
           pool.name
         ),
       () => {
+        sendAddLiquidityEvent(LiquidityEvents.success, 'Add', gtmEvent);
         if (window.location.pathname.includes(pool.pool_dlt_id))
           pushPortfolio();
       },
-      () => rejectNotification(dispatch),
-      () =>
+      () => {
+        sendAddLiquidityEvent(LiquidityEvents.fail, 'Add', {
+          ...gtmEvent,
+          error: 'Transaction rejected by user',
+        });
+        rejectNotification(dispatch);
+      },
+      (msg) => {
+        sendAddLiquidityEvent(LiquidityEvents.fail, 'Add', {
+          ...gtmEvent,
+          error: msg,
+        });
         addLiquidityFailedNotification(
           dispatch,
           cleanTkn,
@@ -66,9 +103,22 @@ export const AddLiquidityEmptyCTA = ({
           cleanBnt,
           bnt.symbol,
           pool.name
-        )
+        );
+      }
     );
-  }, [amountTkn, tkn, amountBnt, bnt, pool, pushPortfolio, dispatch]);
+  }, [
+    amountTkn,
+    amountBnt,
+    chainId,
+    pool.name,
+    pool.converter_dlt_id,
+    pool.pool_dlt_id,
+    tkn,
+    bnt,
+    fiatToggle,
+    dispatch,
+    pushPortfolio,
+  ]);
 
   const [onStart, ModalApprove] = useApproveModal(
     [
