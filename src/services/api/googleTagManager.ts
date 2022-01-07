@@ -175,7 +175,7 @@ export enum LiquidityEvents {
   success = 'Liquidity Success',
 }
 
-export const sendAddLiquidityEvent = (
+export const sendLiquidityEvent = (
   event: LiquidityEvents,
   event_category: 'Add' | 'Remove',
   event_properties?: {}

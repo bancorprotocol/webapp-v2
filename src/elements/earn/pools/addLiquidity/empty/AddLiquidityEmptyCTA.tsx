@@ -14,11 +14,11 @@ import { useCallback } from 'react';
 import { useNavigation } from 'services/router';
 import {
   LiquidityEvents,
-  sendAddLiquidityEvent,
+  sendLiquidityEvent,
 } from 'services/api/googleTagManager';
 import { EthNetworks } from 'services/web3/types';
 import BigNumber from 'bignumber.js';
-import { useAppSelector } from '../../../../../redux';
+import { useAppSelector } from 'redux/index';
 
 interface Props {
   pool: Pool;
@@ -46,7 +46,7 @@ export const AddLiquidityEmptyCTA = ({
     const cleanTkn = prettifyNumber(amountTkn);
     const cleanBnt = prettifyNumber(amountBnt);
     const gtmEvent = {
-      liquidity_type: 'Add Liquidity Empty',
+      liquidity_type: 'Add Liquidity',
       liquidity_blockchain_network:
         chainId === EthNetworks.Ropsten ? 'Ropsten' : 'MainNet',
       liquidity_poolName: pool.name,
@@ -62,7 +62,7 @@ export const AddLiquidityEmptyCTA = ({
         .toString(),
       liquidity_input_type: fiatToggle ? 'Fiat' : 'Token',
     };
-    sendAddLiquidityEvent(LiquidityEvents.click, 'Add', gtmEvent);
+    sendLiquidityEvent(LiquidityEvents.click, 'Add', gtmEvent);
     await addLiquidity(
       amountBnt,
       bnt,
@@ -80,19 +80,19 @@ export const AddLiquidityEmptyCTA = ({
           pool.name
         ),
       () => {
-        sendAddLiquidityEvent(LiquidityEvents.success, 'Add', gtmEvent);
+        sendLiquidityEvent(LiquidityEvents.success, 'Add', gtmEvent);
         if (window.location.pathname.includes(pool.pool_dlt_id))
           pushPortfolio();
       },
       () => {
-        sendAddLiquidityEvent(LiquidityEvents.fail, 'Add', {
+        sendLiquidityEvent(LiquidityEvents.fail, 'Add', {
           ...gtmEvent,
           error: 'Transaction rejected by user',
         });
         rejectNotification(dispatch);
       },
       (msg) => {
-        sendAddLiquidityEvent(LiquidityEvents.fail, 'Add', {
+        sendLiquidityEvent(LiquidityEvents.fail, 'Add', {
           ...gtmEvent,
           error: msg,
         });

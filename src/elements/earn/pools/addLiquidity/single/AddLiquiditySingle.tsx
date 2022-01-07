@@ -20,12 +20,19 @@ import {
 } from 'services/notifications/notifications';
 import { useNavigation } from 'services/router';
 import { ApprovalContract } from 'services/web3/approval';
+import { EthNetworks } from '../../../../../services/web3/types';
+import {
+  LiquidityEvents,
+  sendLiquidityEvent,
+} from '../../../../../services/api/googleTagManager';
+import { useWeb3React } from '@web3-react/core';
 
 interface Props {
   pool: Pool;
 }
 
 export const AddLiquiditySingle = ({ pool }: Props) => {
+  const { chainId } = useWeb3React();
   const dispatch = useDispatch();
   const tkn = useAppSelector<Token | undefined>(
     getTokenById(pool.reserves[0].address)
@@ -33,6 +40,7 @@ export const AddLiquiditySingle = ({ pool }: Props) => {
   const bnt = useAppSelector<Token | undefined>(
     getTokenById(pool.reserves[1].address)
   );
+  const fiatToggle = useAppSelector<boolean>((state) => state.user.usdToggle);
   const { pushPortfolio, pushPools, pushLiquidityError } = useNavigation();
   const [isBNTSelected, setIsBNTSelected] = useState(false);
   const [amount, setAmount] = useState('');
@@ -60,6 +68,17 @@ export const AddLiquiditySingle = ({ pool }: Props) => {
 
   const addProtection = async () => {
     const cleanAmount = prettifyNumber(amount);
+    const gtmEvent = {
+      liquidity_type: 'Add Protection',
+      liquidity_blockchain_network:
+        chainId === EthNetworks.Ropsten ? 'Ropsten' : 'MainNet',
+      liquidity_poolName: pool.name,
+      liquidity_tkn_symbol: selectedToken.symbol,
+      liquidity_tkn_amount: amount,
+      liquidity_tkn_amount_usd: amountUsd,
+      liquidity_input_type: fiatToggle ? 'Fiat' : 'Token',
+    };
+    sendLiquidityEvent(LiquidityEvents.click, 'Add', gtmEvent);
     await addLiquiditySingle(
       pool,
       selectedToken,
@@ -73,17 +92,29 @@ export const AddLiquiditySingle = ({ pool }: Props) => {
           pool.name
         ),
       () => {
+        sendLiquidityEvent(LiquidityEvents.success, 'Add', gtmEvent);
         if (window.location.pathname.includes(pool.pool_dlt_id))
           pushPortfolio();
       },
-      () => rejectNotification(dispatch),
-      () =>
+      () => {
+        sendLiquidityEvent(LiquidityEvents.fail, 'Add', {
+          ...gtmEvent,
+          error: 'Transaction rejected by user',
+        });
+        rejectNotification(dispatch);
+      },
+      (msg) => {
+        sendLiquidityEvent(LiquidityEvents.fail, 'Add', {
+          ...gtmEvent,
+          error: msg,
+        });
         addLiquiditySingleFailedNotification(
           dispatch,
           cleanAmount,
           selectedToken.symbol,
           pool.name
-        )
+        );
+      }
     );
   };
 
