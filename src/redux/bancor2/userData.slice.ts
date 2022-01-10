@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { EthAddress } from '../../services/web3/types';
+import { Address } from '../../services/web3/types';
 
 const mockBalances = [
   {
@@ -17,8 +17,8 @@ const mockBalances = [
 ];
 
 interface UserDataState {
-  currentUser?: EthAddress;
-  balances: Map<EthAddress, string>;
+  currentUser?: Address;
+  balances: Map<Address, string>;
   isLoading: boolean;
 }
 
@@ -32,7 +32,7 @@ const userDataSlice = createSlice({
   name: 'userData',
   initialState,
   reducers: {
-    setCurrentUser: (state, action: PayloadAction<EthAddress | undefined>) => {
+    setCurrentUser: (state, action: PayloadAction<Address | undefined>) => {
       state.currentUser = action.payload;
     },
     setBalances: (state) => {

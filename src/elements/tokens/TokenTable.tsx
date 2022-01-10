@@ -11,6 +11,7 @@ import { NavLink } from 'react-router-dom';
 import { wethToken } from 'services/web3/config';
 import { SearchInput } from 'components/searchInput/SearchInput';
 import { swapByfrom } from 'services/router';
+import { getAllTokensByTL } from '../../redux/bancor2/tokens.selector';
 
 interface Props {
   searchInput: string;
@@ -18,7 +19,7 @@ interface Props {
 }
 
 export const TokenTable = ({ searchInput, setSearchInput }: Props) => {
-  const tokens = useAppSelector<Token[]>((state) => state.bancor.tokens);
+  const tokens = useAppSelector(getAllTokensByTL);
 
   const data = useMemo<Token[]>(() => {
     return tokens.filter(

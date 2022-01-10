@@ -1,5 +1,8 @@
 import { useAppSelector } from '../redux';
-import { getTokens } from '../redux/bancor2/tokens.selector';
+import {
+  getAllTokens,
+  getAllTokensByTL,
+} from '../redux/bancor2/tokens.selector';
 import { Image } from '../components/image/Image';
 import { orderBy } from 'lodash';
 import {
@@ -12,9 +15,8 @@ import { setCurrentUser } from '../redux/bancor2/userData.slice';
 export const ExamplePage = () => {
   const dispatch = useDispatch();
 
-  const tokens = useAppSelector(getTokens());
-  const allTokens = useAppSelector(getTokens(true));
-  const tokens2 = useAppSelector(getTokens());
+  const tokens = useAppSelector(getAllTokensByTL);
+  const allTokens = useAppSelector(getAllTokens);
 
   const selectedList = useAppSelector<TokenListName>(
     (state) => state.tokenLists.selectedTokenList
@@ -70,8 +72,8 @@ export const ExamplePage = () => {
         <h3>more tokens</h3>
       </div>
       <div className="grid grid-cols-3">
-        {[tokens, allTokens, tokens2].map((data) => (
-          <div className="space-y-20">
+        {[tokens, allTokens].map((data, index) => (
+          <div className="space-y-20" key={index}>
             <h2>Token Count: {data.length}</h2>
             {orderBy(data, ['balance', 'symbol'], ['desc', 'asc']).map(
               (token, index) => (

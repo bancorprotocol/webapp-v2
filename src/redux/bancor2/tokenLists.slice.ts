@@ -1,13 +1,13 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { EthAddress } from '../../services/web3/types';
+import { Address } from '../../services/web3/types';
 
 export type TokenListName = '1inch' | 'CoinGecko' | 'Defiprime' | '';
 
 export interface ITokenListToken {
-  address: EthAddress;
+  address: Address;
   name: string;
   symbol: string;
-  logoURI: string;
+  logoURI?: string;
 }
 
 export interface ITokenList {
@@ -27,7 +27,7 @@ export const initialState: TokenListsState = {
   isTokenListDataLoaded: false,
   tokenLists: new Map(),
   selectedTokenList: '1inch',
-  fallbackTokenList: 'CoinGecko',
+  fallbackTokenList: '1inch',
 };
 
 const tokenListsSlice = createSlice({

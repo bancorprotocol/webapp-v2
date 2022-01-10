@@ -1,4 +1,4 @@
-export type EthAddress = string;
+export type Address = string;
 
 export enum EthNetworks {
   Mainnet = 1,

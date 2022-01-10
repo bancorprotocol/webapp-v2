@@ -1,11 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { APIPool, APIToken, WelcomeData } from '../../services/api/bancor';
-import { EthAddress } from '../../services/web3/types';
+import { Address } from '../../services/web3/types';
 
 interface ApiDataState {
   isApiDataLoaded: boolean;
-  apiTokens: Map<EthAddress, APIToken>;
-  apiPools: Map<EthAddress, APIPool>;
+  apiTokens: Map<Address, APIToken>;
+  apiPools: Map<Address, APIPool>;
 }
 
 export const initialState: ApiDataState = {

@@ -1,6 +1,14 @@
 import { ITokenList, ITokenListToken, TokenListName } from './tokenLists.slice';
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../index';
+import { ethToken } from '../../services/web3/config';
+
+const ETH = {
+  address: ethToken,
+  symbol: 'ETH',
+  name: 'Ethereum',
+  logoURI: 'https://cryptologos.cc/logos/ethereum-eth-logo.svg',
+};
 
 export const getSelectedTokenList = createSelector(
   [
@@ -15,7 +23,7 @@ export const getSelectedTokenList = createSelector(
     if (!list) {
       return [];
     }
-    return list.tokens;
+    return [ETH, ...list.tokens];
   }
 );
 
@@ -32,6 +40,6 @@ export const getFallbackTokenList = createSelector(
     if (!list) {
       return [];
     }
-    return list.tokens;
+    return [ETH, ...list.tokens];
   }
 );
