@@ -1,25 +1,13 @@
 import { SwapSwitch } from 'elements/swapSwitch/SwapSwitch';
 import { ReactComponent as IconTimes } from 'assets/icons/times.svg';
-import { useHistory } from 'react-router-dom';
 
 interface Props {
   title: string;
   subtitle?: string;
-  goBackRoute?: string;
+  goBack: Function;
   children: JSX.Element | JSX.Element[];
 }
-export const Widget = ({
-  title,
-  subtitle,
-  children,
-  goBackRoute = '/pools',
-}: Props) => {
-  const history = useHistory();
-
-  const goBack = () => {
-    history.push(goBackRoute);
-  };
-
+export const Widget = ({ title, subtitle, children, goBack }: Props) => {
   return (
     <section className="widget mx-auto">
       <div className="flex justify-between py-16 px-20">
