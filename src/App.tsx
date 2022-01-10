@@ -34,7 +34,6 @@ import { isUnsupportedNetwork } from 'utils/helperFunctions';
 import { MarketingBanner } from './elements/marketingBanner/MarketingBanner';
 import { keepWSOpen } from 'services/web3';
 import { Router } from 'pages/Router';
-import { ExamplePage } from './pages/ExamplePage';
 
 export const App = () => {
   const dispatch = useDispatch();
