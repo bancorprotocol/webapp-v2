@@ -279,10 +279,35 @@ export const tokensNoBalance$ = combineLatest([
       }
     });
 
+    console.log(
+      'Api Tokens',
+      newApiTokens.map((token) => tokenToMinToken(token))
+    );
+    console.log(
+      'Overlapping Tokens',
+      overlappingTokens.map((token) => tokenToMinToken(token))
+    );
+    console.log(
+      'Missing Tokens',
+      newApiTokens
+        .filter(
+          (x) =>
+            overlappingTokens.findIndex(
+              (y) => x.address.toLowerCase() === y.address.toLowerCase()
+            ) === -1
+        )
+        .map((token) => tokenToMinToken(token))
+    );
+
     return overlappingTokens;
   }),
   shareReplay(1)
 );
+
+const tokenToMinToken = (token: any) => ({
+  address: token.address,
+  symbol: token.symbol,
+});
 
 export const tokens$ = combineLatest([user$, tokensNoBalance$]).pipe(
   switchMapIgnoreThrow(async ([user, tokensNoBalance]) => {
