@@ -33,13 +33,13 @@ export const getAllTokensByTL = createSelector(
       if (!apiToken) {
         return undefined;
       }
-      return buildTokenObject({
+      return buildTokenObject(
         apiToken,
         apiPools,
         tlFallback,
         balances,
-        tlToken,
-      });
+        tlToken
+      );
     }).filter((token) => !!token) as Token[];
   }
 );
@@ -62,13 +62,13 @@ export const getAllTokens = createSelector(
   ): Token[] => {
     return Array.from(apiTokens.values(), (apiToken) => {
       const tlToken = tlTokens.get(apiToken.dlt_id);
-      return buildTokenObject({
+      return buildTokenObject(
         apiToken,
         apiPools,
         tlFallback,
         balances,
-        tlToken,
-      });
+        tlToken
+      );
     });
   }
 );

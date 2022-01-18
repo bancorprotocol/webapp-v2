@@ -8,22 +8,14 @@ import { get7DaysAgo } from './pureFunctions';
 import { UTCTimestamp } from 'lightweight-charts';
 import BigNumber from 'bignumber.js';
 
-interface BuildTokenProps {
-  apiToken: APIToken;
-  apiPools: APIPool[];
-  tlFallback: Map<Address, ITokenListToken>;
-  balances?: Map<Address, string>;
-  tlToken?: ITokenListToken;
-}
-
 // Helper function to build token object
-export const buildTokenObject = ({
-  apiToken,
-  apiPools,
-  tlFallback,
-  balances,
-  tlToken,
-}: BuildTokenProps): Token => {
+export const buildTokenObject = (
+  apiToken: APIToken,
+  apiPools: APIPool[],
+  tlFallback: Map<Address, ITokenListToken>,
+  balances?: Map<Address, string>,
+  tlToken?: ITokenListToken
+): Token => {
   const pool = apiPools.find((p) =>
     p.reserves.find((r) => r.address === apiToken.dlt_id)
   ); // TODO - add usd_volume_24 and isWhiteListed to token api welcome data to avoid this
@@ -71,18 +63,12 @@ export const buildTokenObject = ({
   };
 };
 
-interface BuildPoolProps {
-  apiPool: APIPool;
-  tkn: Token;
-  bnt: Token;
-}
-
 // Helper function to build pool object
-export const buildPoolObject = ({
-  apiPool,
-  tkn,
-  bnt,
-}: BuildPoolProps): Pool | undefined => {
+export const buildPoolObject = (
+  apiPool: APIPool,
+  tkn: Token,
+  bnt: Token
+): Pool | undefined => {
   const liquidity = Number(apiPool.liquidity.usd ?? 0);
   const fees_24h = Number(apiPool.fees_24h.usd ?? 0);
   let apr = 0;
@@ -161,7 +147,7 @@ export const buildPoolArray = (
       if (!apiPool) {
         return undefined;
       }
-      return buildPoolObject({ apiPool, tkn, bnt });
+      return buildPoolObject(apiPool, tkn, bnt);
     })
     .filter((pool) => !!pool) as Pool[];
 };
