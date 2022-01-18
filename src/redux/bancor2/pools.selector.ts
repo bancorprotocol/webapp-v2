@@ -69,7 +69,6 @@ const buildPool = ({ apiPool, tkn, bnt }: BuildPoolProps): Pool | undefined => {
     version: apiPool.version,
     supply: Number(apiPool.supply),
     decimals: apiPool.decimals,
-    isWhitelisted: apiPool.isWhitelisted,
     apr,
     reward: apiPool.reward,
     isProtected: apiPool.isWhitelisted, // TODO add isProtected by fetching minNetworkTokenLiquidityForMinting

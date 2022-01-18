@@ -61,7 +61,7 @@ const buildToken = ({
     }));
 
   const usd_volume_24 = pool ? pool.volume_24h.usd : null;
-  const isWhitelisted = pool ? pool.isWhitelisted : false;
+  const isProtected = pool ? pool.isWhitelisted : false;
 
   return {
     name,
@@ -76,8 +76,8 @@ const buildToken = ({
     price_change_24,
     price_history_7d,
     usd_volume_24,
-    isWhitelisted,
-    chainId: 1, // TODO
+    isProtected, // TODO currently based on isWhitelisted
+    chainId: 1, // TODO not yet in redux state
   };
 };
 
