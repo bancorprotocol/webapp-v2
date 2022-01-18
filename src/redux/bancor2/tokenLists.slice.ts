@@ -18,15 +18,15 @@ export interface ITokenList {
 
 interface TokenListsState {
   isTokenListDataLoaded: boolean;
-  tokenLists: Map<TokenListName, ITokenList>;
-  selectedTokenList: TokenListName;
+  tokenLists: ITokenList[];
+  selectedTokenList: TokenListName[];
   fallbackTokenList: TokenListName;
 }
 
 export const initialState: TokenListsState = {
   isTokenListDataLoaded: false,
-  tokenLists: new Map(),
-  selectedTokenList: '1inch',
+  tokenLists: [],
+  selectedTokenList: ['1inch'],
   fallbackTokenList: '1inch',
 };
 
@@ -35,13 +35,18 @@ const tokenListsSlice = createSlice({
   initialState,
   reducers: {
     setTokenListData: (state, action: PayloadAction<ITokenList[]>) => {
-      state.tokenLists = new Map(action.payload.map((tl) => [tl.name, tl]));
+      state.tokenLists = action.payload;
     },
     setIsTokenListDataLoaded: (state, action: PayloadAction<boolean>) => {
       state.isTokenListDataLoaded = action.payload;
     },
     setSelectedTokenList: (state, action: PayloadAction<TokenListName>) => {
-      state.selectedTokenList = action.payload;
+      const index = state.selectedTokenList.indexOf(action.payload);
+      if (index > -1) {
+        state.selectedTokenList.splice(index, 1);
+      } else {
+        state.selectedTokenList.push(action.payload);
+      }
     },
   },
 });
