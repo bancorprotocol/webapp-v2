@@ -3,6 +3,8 @@ import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../index';
 import { ethToken } from 'services/web3/config';
 import { uniqBy } from 'lodash';
+import { utils } from 'ethers';
+import { Address } from 'services/web3/types';
 
 const ETH = {
   address: ethToken,
@@ -16,10 +18,14 @@ export const getSelectedTokenList = createSelector(
     (state: RootState) => state.tokenLists.tokenLists,
     (state: RootState) => state.tokenLists.selectedTokenList,
   ],
-  (tokenLists: ITokenList[], selected: TokenListName[]): ITokenListToken[] => {
+  (
+    tokenLists: ITokenList[],
+    selected: TokenListName[]
+  ): Map<Address, ITokenListToken> => {
     if (!selected.length) {
-      return [];
+      return new Map();
     }
+
     const selectedTokenLists = tokenLists.filter((list) =>
       selected.some((id) => id === list.name)
     );
@@ -27,7 +33,11 @@ export const getSelectedTokenList = createSelector(
     const uniqueTokens = uniqBy(merged, (tlToken) =>
       tlToken.address.toLowerCase()
     );
-    return [ETH, ...uniqueTokens];
+    const tokensWithEth = [ETH, ...uniqueTokens];
+
+    return new Map(
+      tokensWithEth.map((token) => [utils.getAddress(token.address), token])
+    );
   }
 );
 
@@ -36,11 +46,18 @@ export const getFallbackTokenList = createSelector(
     (state: RootState) => state.tokenLists.tokenLists,
     (state: RootState) => state.tokenLists.fallbackTokenList,
   ],
-  (tokenLists: ITokenList[], fallback: TokenListName): ITokenListToken[] => {
+  (
+    tokenLists: ITokenList[],
+    fallback: TokenListName
+  ): Map<Address, ITokenListToken> => {
     const list = tokenLists.find((list) => list.name === fallback);
     if (!list) {
-      return [];
+      return new Map();
     }
-    return [ETH, ...list.tokens];
+
+    const tlFallback: ITokenListToken[] = [ETH, ...list.tokens];
+    return new Map(
+      tlFallback.map((token) => [utils.getAddress(token.address), token])
+    );
   }
 );

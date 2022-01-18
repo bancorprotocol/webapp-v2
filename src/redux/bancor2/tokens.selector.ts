@@ -4,20 +4,21 @@ import {
   getFallbackTokenList,
   getSelectedTokenList,
 } from './tokenLists.selector';
-import { APIData, APIPool, APIToken } from 'services/api/bancor';
+import { APIPool, APIToken } from 'services/api/bancor';
 import { Token } from 'services/observables/tokens';
-import { buildWethToken, ropstenImage } from 'services/web3/config';
+import { ropstenImage } from 'services/web3/config';
 import { ITokenListToken } from './tokenLists.slice';
 import { Address } from 'services/web3/types';
 import { getUserBalances } from './userData.selector';
 import { calculatePercentageChange } from 'utils/formulas';
 import { get7DaysAgo } from 'utils/pureFunctions';
 import { UTCTimestamp } from 'lightweight-charts';
+import { getApiPools, getApiTokens } from './apiData.selector';
 
 interface BuildTokenProps {
   apiToken: APIToken;
   apiPools: APIPool[];
-  fallbackTokens: Map<Address, ITokenListToken>;
+  tlFallback: Map<Address, ITokenListToken>;
   balances?: Map<Address, string>;
   tlToken?: ITokenListToken;
 }
@@ -26,7 +27,7 @@ interface BuildTokenProps {
 const buildToken = ({
   apiToken,
   apiPools,
-  fallbackTokens,
+  tlFallback,
   balances,
   tlToken,
 }: BuildTokenProps): Token => {
@@ -42,7 +43,7 @@ const buildToken = ({
     : null;
 
   // Get fallback token and set image and name
-  const fallbackToken = fallbackTokens.get(apiToken.dlt_id.toLowerCase());
+  const fallbackToken = tlFallback.get(apiToken.dlt_id.toLowerCase());
   const logoURI = tlToken?.logoURI ?? fallbackToken?.logoURI ?? ropstenImage;
   const name = tlToken?.name ?? fallbackToken?.name ?? apiToken.symbol;
 
@@ -83,81 +84,58 @@ const buildToken = ({
 
 export const getAllTokensByTL = createSelector(
   [
-    (state: RootState) => state.apiData.apiData,
+    (state: RootState) => getApiTokens(state),
+    (state: RootState) => getApiPools(state),
     (state: RootState) => getSelectedTokenList(state),
     (state: RootState) => getFallbackTokenList(state),
     (state: RootState) => getUserBalances(state),
   ],
   (
-    apiData: APIData | undefined,
-    tlTokens: ITokenListToken[],
-    tlFallback: ITokenListToken[],
+    apiTokens: Map<Address, APIToken>,
+    apiPools: APIPool[],
+    tlTokens: Map<Address, ITokenListToken>,
+    tlFallback: Map<Address, ITokenListToken>,
     balances?: Map<Address, string>
   ): Token[] => {
-    if (!apiData) {
-      return [];
-    }
-
-    const apiTokensMap = new Map(
-      apiData.tokens.map((token) => [token.dlt_id.toLowerCase(), token])
-    );
-    const fallbackTokens = new Map(
-      tlFallback.map((t) => [t.address.toLowerCase(), t])
-    );
-
     // Return only tokens from selected token list
-    return tlTokens
-      .map((tlToken) => {
-        const apiToken = apiTokensMap.get(tlToken.address.toLowerCase());
-        if (!apiToken) {
-          return undefined;
-        }
-        return buildToken({
-          apiToken,
-          apiPools: apiData.pools,
-          fallbackTokens,
-          balances,
-          tlToken,
-        });
-      })
-      .filter((token) => !!token) as Token[];
+    return Array.from(tlTokens.values(), (tlToken) => {
+      const apiToken = apiTokens.get(tlToken.address);
+      if (!apiToken) {
+        return undefined;
+      }
+      return buildToken({
+        apiToken,
+        apiPools,
+        tlFallback,
+        balances,
+        tlToken,
+      });
+    }).filter((token) => !!token) as Token[];
   }
 );
 
 export const getAllTokens = createSelector(
   [
-    (state: RootState) => state.apiData.apiData,
+    (state: RootState) => getApiTokens(state),
+    (state: RootState) => getApiPools(state),
     (state: RootState) => getSelectedTokenList(state),
     (state: RootState) => getFallbackTokenList(state),
     (state: RootState) => getUserBalances(state),
   ],
   (
-    apiData: APIData | undefined,
-    tlTokens: ITokenListToken[],
-    tlFallback: ITokenListToken[],
+    apiTokens: Map<Address, APIToken>,
+    apiPools: APIPool[],
+    tlTokens: Map<Address, ITokenListToken>,
+    tlFallback: Map<Address, ITokenListToken>,
     balances?: Map<Address, string>
   ): Token[] => {
-    if (!apiData) {
-      return [];
-    }
-
-    const wethToken = buildWethToken(apiData.tokens);
-    const apiTokens = [...apiData.tokens, wethToken];
-
-    const fallbackTokens = new Map(
-      tlFallback.map((t) => [t.address.toLowerCase(), t])
-    );
-    const tokenListTokens = new Map(
-      tlTokens.map((t) => [t.address.toLowerCase(), t])
-    );
-
     // Return all tokens
-    return apiTokens.map((apiToken) => {
-      const tlToken = tokenListTokens.get(apiToken.dlt_id.toLowerCase());
+    return Array.from(apiTokens.values(), (apiToken) => {
+      const tlToken = tlTokens.get(apiToken.dlt_id);
       return buildToken({
         apiToken,
-        apiPools: apiData.pools,
-        fallbackTokens,
+        apiPools,
+        tlFallback,
         balances,
         tlToken,
       });
