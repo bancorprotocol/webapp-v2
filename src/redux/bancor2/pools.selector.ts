@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../index';
-import { APIPool } from 'services/api/bancor';
+import { APIData, APIPool } from 'services/api/bancor';
 import { Pool, Reserve, Token } from 'services/observables/tokens';
 import { getAllTokensByTL } from './tokens.selector';
 import BigNumber from 'bignumber.js';
@@ -76,10 +76,14 @@ const buildPool = ({ apiPool, tkn, bnt }: BuildPoolProps): Pool | undefined => {
 
 export const getAllPoolsByTL = createSelector(
   [
-    (state: RootState) => state.apiData.apiPools,
+    (state: RootState) => state.apiData,
     (state: RootState) => getAllTokensByTL(state),
   ],
-  (apiPools: APIPool[], tokens: Token[]): Pool[] => {
+  (apiData: APIData, tokens: Token[]): Pool[] => {
+    if (!apiData) {
+      return [];
+    }
+
     const bnt = tokens.find((t) => t.symbol === 'BNT');
     if (!bnt) {
       return [];
@@ -89,7 +93,7 @@ export const getAllPoolsByTL = createSelector(
         if (tkn.symbol === 'BNT') {
           return undefined;
         }
-        const apiPool = apiPools.find((p) =>
+        const apiPool = apiData.pools.find((p) =>
           p.reserves.find(
             (r) => r.address.toLowerCase() === tkn.address.toLowerCase()
           )

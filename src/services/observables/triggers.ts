@@ -40,20 +40,17 @@ import {
   rewards$,
 } from './liquidity';
 import { apiData$ } from './pools';
-import {
-  setIsApiDataLoaded,
-  setWelcomeData,
-} from '../../redux/bancor2/apiData.slice';
+import { setAPIData, setIsApiDataLoaded } from 'redux/bancor2/apiData.slice';
 import {
   ITokenList,
   setIsTokenListDataLoaded,
   setTokenListData,
-} from '../../redux/bancor2/tokenLists.slice';
-import { setBalances } from '../../redux/bancor2/userData.slice';
+} from 'redux/bancor2/tokenLists.slice';
+import { setBalances } from 'redux/bancor2/userData.slice';
 
 export const subscribeToObservables = (dispatch: any) => {
   apiData$.subscribe((apiData) => {
-    dispatch(setWelcomeData(apiData));
+    dispatch(setAPIData(apiData));
     dispatch(setIsApiDataLoaded(true));
     dispatch(setBalances());
   });

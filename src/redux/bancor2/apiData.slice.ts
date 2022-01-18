@@ -1,27 +1,22 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { APIPool, APIToken, WelcomeData } from 'services/api/bancor';
-import { buildWethToken } from 'services/web3/config';
+import { APIData } from 'services/api/bancor';
 
 interface ApiDataState {
   isApiDataLoaded: boolean;
-  apiTokens: APIToken[];
-  apiPools: APIPool[];
+  apiData?: APIData;
 }
 
 export const initialState: ApiDataState = {
   isApiDataLoaded: false,
-  apiTokens: [],
-  apiPools: [],
+  apiData: undefined,
 };
 
 const apiDataSlice = createSlice({
   name: 'apiData',
   initialState,
   reducers: {
-    setWelcomeData: (state, action: PayloadAction<WelcomeData>) => {
-      const weth = buildWethToken(action.payload.tokens);
-      state.apiTokens = [...action.payload.tokens, weth];
-      state.apiPools = action.payload.pools;
+    setAPIData: (state, action: PayloadAction<APIData>) => {
+      state.apiData = action.payload;
     },
     setIsApiDataLoaded: (state, action: PayloadAction<boolean>) => {
       state.isApiDataLoaded = action.payload;
@@ -29,6 +24,6 @@ const apiDataSlice = createSlice({
   },
 });
 
-export const { setWelcomeData, setIsApiDataLoaded } = apiDataSlice.actions;
+export const { setAPIData, setIsApiDataLoaded } = apiDataSlice.actions;
 
 export const apiData = apiDataSlice.reducer;
