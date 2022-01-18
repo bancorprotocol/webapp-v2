@@ -32,18 +32,14 @@ const buildToken = ({
   tlToken,
 }: BuildTokenProps): Token => {
   const pool = apiPools.find((p) =>
-    p.reserves.find(
-      (r) => r.address.toLowerCase() === apiToken.dlt_id.toLowerCase()
-    )
+    p.reserves.find((r) => r.address === apiToken.dlt_id)
   ); // TODO - add usd_volume_24 and isWhiteListed to token api welcome data to avoid this
 
   // Set balance; if user is NOT logged in set null
-  const balance = balances
-    ? balances.get(apiToken.dlt_id.toLowerCase()) ?? '0'
-    : null;
+  const balance = balances ? balances.get(apiToken.dlt_id) ?? '0' : null;
 
   // Get fallback token and set image and name
-  const fallbackToken = tlFallback.get(apiToken.dlt_id.toLowerCase());
+  const fallbackToken = tlFallback.get(apiToken.dlt_id);
   const logoURI = tlToken?.logoURI ?? fallbackToken?.logoURI ?? ropstenImage;
   const name = tlToken?.name ?? fallbackToken?.name ?? apiToken.symbol;
 

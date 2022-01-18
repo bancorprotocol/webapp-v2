@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Address } from '../../services/web3/types';
+import { utils } from 'ethers';
 
 export interface UserTokenBalance {
   address: Address;
@@ -8,15 +9,15 @@ export interface UserTokenBalance {
 
 const mockBalances: UserTokenBalance[] = [
   {
-    address: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'.toLowerCase(),
+    address: utils.getAddress('0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'),
     balance: '100.0000',
   },
   {
-    address: '0x1F573D6Fb3F13d689FF844B4cE37794d79a7FF1C'.toLowerCase(),
+    address: utils.getAddress('0x1F573D6Fb3F13d689FF844B4cE37794d79a7FF1C'),
     balance: '200.0000',
   },
   {
-    address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'.toLowerCase(),
+    address: utils.getAddress('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'),
     balance: '300.0000',
   },
 ];

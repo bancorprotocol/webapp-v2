@@ -25,15 +25,11 @@ const buildPool = ({ apiPool, tkn, bnt }: BuildPoolProps): Pool | undefined => {
       .toNumber();
   }
 
-  const reserveTkn = apiPool.reserves.find(
-    (r) => r.address.toLowerCase() === tkn.address.toLowerCase()
-  );
+  const reserveTkn = apiPool.reserves.find((r) => r.address === tkn.address);
   if (!reserveTkn) {
     return undefined;
   }
-  const reserveBnt = apiPool.reserves.find(
-    (r) => r.address.toLowerCase() === bnt.address.toLowerCase()
-  );
+  const reserveBnt = apiPool.reserves.find((r) => r.address === bnt.address);
   if (!reserveBnt) {
     return undefined;
   }

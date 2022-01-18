@@ -2,6 +2,7 @@ import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../index';
 import { Address } from '../../services/web3/types';
 import { UserTokenBalance } from './userData.slice';
+import { utils } from 'ethers';
 
 export const getUserBalances = createSelector(
   [
@@ -17,7 +18,7 @@ export const getUserBalances = createSelector(
     }
 
     return new Map(
-      balances.map((item) => [item.address.toLowerCase(), item.balance])
+      balances.map((item) => [utils.getAddress(item.address), item.balance])
     );
   }
 );

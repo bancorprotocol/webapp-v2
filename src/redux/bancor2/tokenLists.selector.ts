@@ -30,14 +30,13 @@ export const getSelectedTokenList = createSelector(
       selected.some((id) => id === list.name)
     );
     const merged = selectedTokenLists.flatMap((list) => list.tokens);
-    const uniqueTokens = uniqBy(merged, (tlToken) =>
-      tlToken.address.toLowerCase()
-    );
+    const uniqueTokens = uniqBy(merged, (tlToken) => tlToken.address);
     const tokensWithEth = [ETH, ...uniqueTokens];
+    const normalized: ITokenListToken[] = tokensWithEth.map((token) => {
+      return { ...token, address: utils.getAddress(token.address) };
+    });
 
-    return new Map(
-      tokensWithEth.map((token) => [utils.getAddress(token.address), token])
-    );
+    return new Map(normalized.map((token) => [token.address, token]));
   }
 );
 
@@ -56,8 +55,10 @@ export const getFallbackTokenList = createSelector(
     }
 
     const tlFallback: ITokenListToken[] = [ETH, ...list.tokens];
-    return new Map(
-      tlFallback.map((token) => [utils.getAddress(token.address), token])
-    );
+    const normalized: ITokenListToken[] = tlFallback.map((token) => {
+      return { ...token, address: utils.getAddress(token.address) };
+    });
+
+    return new Map(normalized.map((token) => [token.address, token]));
   }
 );
