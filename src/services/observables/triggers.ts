@@ -1,8 +1,6 @@
 import {
   tokenLists$,
-  userPreferredListIds$,
   keeperDaoTokens$,
-  listOfLists,
   tokens$,
   pools$,
   tokensNoBalance$,
@@ -16,7 +14,6 @@ import {
   setTokenList,
   setTokenLists,
 } from 'redux/bancor/bancor';
-import { getTokenListLS, setTokenListLS } from 'utils/localStorage';
 import { take } from 'rxjs/operators';
 import {
   loadingBalances$,
@@ -75,13 +72,6 @@ export const subscribeToObservables = (dispatch: any) => {
   loadingBalances$.subscribe((loading) =>
     dispatch(setLoadingBalances(loading))
   );
-
-  const userListIds = getTokenListLS();
-  if (userListIds.length === 0) {
-    const twoLists = [listOfLists[0].name, listOfLists[1].name];
-    setTokenListLS(twoLists);
-    userPreferredListIds$.next(twoLists);
-  } else userPreferredListIds$.next(userListIds);
 
   tokens$.subscribe((tokenList) => {
     dispatch(setTokenList(tokenList));

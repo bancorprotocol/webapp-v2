@@ -9,6 +9,7 @@ import { prettifyNumber } from 'utils/helperFunctions';
 import BigNumber from 'bignumber.js';
 import { Image } from 'components/image/Image';
 import { useAppSelector } from 'redux/index';
+import { getAllTokensByTL } from 'redux/bancor2/tokens.selector';
 
 interface TokenInputFieldProps {
   label?: string;
@@ -69,7 +70,7 @@ export const TokenInputField = ({
   const loadingBalances = useAppSelector<boolean>(
     (state) => state.user.loadingBalances
   );
-  const tokens = useAppSelector<Token[]>((state) => state.bancor.tokens);
+  const tokens = useAppSelector(getAllTokensByTL);
 
   const onInputChange = (text: string, token?: Token) => {
     text = sanitizeNumberInput(text);

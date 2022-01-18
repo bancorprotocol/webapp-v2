@@ -89,6 +89,9 @@ export const ExamplePage = () => {
                     <div className="opacity-50 font-normal text-14">
                       {token.name}
                     </div>
+                    <div className="opacity-50 font-normal text-14">
+                      {token.address}
+                    </div>
                     {token.balance ? (
                       <div>Balance: {token.balance}</div>
                     ) : (

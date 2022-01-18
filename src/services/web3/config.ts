@@ -34,7 +34,7 @@ export const buildWethToken = (apiTokens?: APIToken[]): APIToken => {
 
   return {
     symbol: 'WETH',
-    dlt_id: wethToken,
+    dlt_id: wethToken.toLowerCase(),
     liquidity: eth ? eth.liquidity : { usd: null },
     rate: eth ? eth.rate : { usd: null },
     rate_24h_ago: eth ? eth.rate_24h_ago : { usd: null },

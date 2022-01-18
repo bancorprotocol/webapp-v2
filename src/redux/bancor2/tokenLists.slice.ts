@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Address } from '../../services/web3/types';
+import { Address } from 'services/web3/types';
+import { getTokenListLS, setTokenListLS } from 'utils/localStorage';
 
 export type TokenListName = '1inch' | 'CoinGecko' | 'Defiprime' | '';
 
@@ -26,7 +27,7 @@ interface TokenListsState {
 export const initialState: TokenListsState = {
   isTokenListDataLoaded: false,
   tokenLists: [],
-  selectedTokenList: ['1inch'],
+  selectedTokenList: [],
   fallbackTokenList: '1inch',
 };
 
@@ -36,6 +37,12 @@ const tokenListsSlice = createSlice({
   reducers: {
     setTokenListData: (state, action: PayloadAction<ITokenList[]>) => {
       state.tokenLists = action.payload;
+      const defaultFirst = action.payload[0].name;
+      const defaultSecond = action.payload[1].name;
+      state.selectedTokenList = getTokenListLS() ?? [
+        defaultFirst,
+        defaultSecond,
+      ];
     },
     setIsTokenListDataLoaded: (state, action: PayloadAction<boolean>) => {
       state.isTokenListDataLoaded = action.payload;
@@ -47,6 +54,7 @@ const tokenListsSlice = createSlice({
       } else {
         state.selectedTokenList.push(action.payload);
       }
+      setTokenListLS(state.selectedTokenList);
     },
   },
 });
