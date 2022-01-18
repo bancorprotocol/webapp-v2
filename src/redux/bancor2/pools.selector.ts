@@ -1,8 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../index';
-import { APIPool } from '../../services/api/bancor';
-import { Pool, Reserve, Token } from '../../services/observables/tokens';
-import { Address } from '../../services/web3/types';
+import { APIPool } from 'services/api/bancor';
+import { Pool, Reserve, Token } from 'services/observables/tokens';
 import { getAllTokensByTL } from './tokens.selector';
 import BigNumber from 'bignumber.js';
 
@@ -80,26 +79,26 @@ export const getAllPoolsByTL = createSelector(
     (state: RootState) => state.apiData.apiPools,
     (state: RootState) => getAllTokensByTL(state),
   ],
-  (apiPools: Map<Address, APIPool>, tokens: Token[]): Pool[] => {
-    const apiPoolsArray = Array.from(apiPools.values());
+  (apiPools: APIPool[], tokens: Token[]): Pool[] => {
     const bnt = tokens.find((t) => t.symbol === 'BNT');
     if (!bnt) {
       return [];
     }
-    const pools = tokens.map((tkn) => {
-      if (tkn.symbol === 'BNT') {
-        return undefined;
-      }
-      const apiPool = apiPoolsArray.find((p) =>
-        p.reserves.find(
-          (r) => r.address.toLowerCase() === tkn.address.toLowerCase()
-        )
-      );
-      if (!apiPool) {
-        return undefined;
-      }
-      return buildPool({ apiPool, tkn, bnt });
-    });
-    return pools.filter((pool) => !!pool) as Pool[];
+    return tokens
+      .map((tkn) => {
+        if (tkn.symbol === 'BNT') {
+          return undefined;
+        }
+        const apiPool = apiPools.find((p) =>
+          p.reserves.find(
+            (r) => r.address.toLowerCase() === tkn.address.toLowerCase()
+          )
+        );
+        if (!apiPool) {
+          return undefined;
+        }
+        return buildPool({ apiPool, tkn, bnt });
+      })
+      .filter((pool) => !!pool) as Pool[];
   }
 );

@@ -1,17 +1,16 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { APIPool, APIToken, WelcomeData } from '../../services/api/bancor';
-import { Address } from '../../services/web3/types';
+import { APIPool, APIToken, WelcomeData } from 'services/api/bancor';
 
 interface ApiDataState {
   isApiDataLoaded: boolean;
-  apiTokens: Map<Address, APIToken>;
-  apiPools: Map<Address, APIPool>;
+  apiTokens: APIToken[];
+  apiPools: APIPool[];
 }
 
 export const initialState: ApiDataState = {
   isApiDataLoaded: false,
-  apiTokens: new Map(),
-  apiPools: new Map(),
+  apiTokens: [],
+  apiPools: [],
 };
 
 const apiDataSlice = createSlice({
@@ -19,12 +18,8 @@ const apiDataSlice = createSlice({
   initialState,
   reducers: {
     setWelcomeData: (state, action: PayloadAction<WelcomeData>) => {
-      state.apiTokens = new Map(
-        action.payload.tokens.map((t) => [t.dlt_id.toLowerCase(), t])
-      );
-      state.apiPools = new Map(
-        action.payload.pools.map((p) => [p.pool_dlt_id, p])
-      );
+      state.apiTokens = action.payload.tokens;
+      state.apiPools = action.payload.pools;
     },
     setIsApiDataLoaded: (state, action: PayloadAction<boolean>) => {
       state.isApiDataLoaded = action.payload;

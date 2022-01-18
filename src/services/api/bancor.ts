@@ -104,6 +104,7 @@ export const getWelcomeData = async (
     return {
       ...data,
       network,
+      // TODO remove address normalization
       pools: data.pools.map((pool) => ({
         ...pool,
         converter_dlt_id: utils.getAddress(pool.converter_dlt_id),

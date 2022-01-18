@@ -1,7 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Address } from '../../services/web3/types';
 
-const mockBalances = [
+export interface UserTokenBalance {
+  address: Address;
+  balance: string;
+}
+
+const mockBalances: UserTokenBalance[] = [
   {
     address: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'.toLowerCase(),
     balance: '100.0000',
@@ -18,14 +23,14 @@ const mockBalances = [
 
 interface UserDataState {
   currentUser?: Address;
-  balances: Map<Address, string>;
+  balances: UserTokenBalance[];
   isLoading: boolean;
 }
 
 export const initialState: UserDataState = {
   currentUser: undefined,
   isLoading: true,
-  balances: new Map(),
+  balances: [],
 };
 
 const userDataSlice = createSlice({
@@ -36,9 +41,7 @@ const userDataSlice = createSlice({
       state.currentUser = action.payload;
     },
     setBalances: (state) => {
-      state.balances = new Map(
-        mockBalances.map(({ address, balance }) => [address, balance])
-      );
+      state.balances = mockBalances;
     },
     setBalancesLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;

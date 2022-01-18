@@ -16,7 +16,7 @@ import { UTCTimestamp } from 'lightweight-charts';
 
 interface BuildTokenProps {
   apiToken: APIToken;
-  pools: APIPool[];
+  apiPools: APIPool[];
   fallbackTokens: Map<Address, ITokenListToken>;
   balances?: Map<Address, string>;
   tlToken?: ITokenListToken;
@@ -25,12 +25,12 @@ interface BuildTokenProps {
 // Helper function to build token object
 const buildToken = ({
   apiToken,
-  pools,
+  apiPools,
   fallbackTokens,
   balances,
   tlToken,
 }: BuildTokenProps): Token => {
-  const pool = pools.find((p) =>
+  const pool = apiPools.find((p) =>
     p.reserves.find(
       (r) => r.address.toLowerCase() === apiToken.dlt_id.toLowerCase()
     )
@@ -90,13 +90,15 @@ export const getAllTokensByTL = createSelector(
     (state: RootState) => getUserBalances(state),
   ],
   (
-    apiTokens: Map<Address, APIToken>,
-    apiPools: Map<Address, APIPool>,
+    apiTokens: APIToken[],
+    apiPools: APIPool[],
     tlTokens: ITokenListToken[],
     tlFallback: ITokenListToken[],
     balances?: Map<Address, string>
   ): Token[] => {
-    const pools = Array.from(apiPools.values());
+    const apiTokensMap = new Map(
+      apiTokens.map((token) => [token.dlt_id.toLowerCase(), token])
+    );
     const fallbackTokens = new Map(
       tlFallback.map((t) => [t.address.toLowerCase(), t])
     );
@@ -105,13 +107,13 @@ export const getAllTokensByTL = createSelector(
     // TODO WETH token
     return tlTokens
       .map((tlToken) => {
-        const apiToken = apiTokens.get(tlToken.address.toLowerCase());
+        const apiToken = apiTokensMap.get(tlToken.address.toLowerCase());
         if (!apiToken) {
           return undefined;
         }
         return buildToken({
           apiToken,
-          pools,
+          apiPools,
           fallbackTokens,
           balances,
           tlToken,
@@ -130,13 +132,12 @@ export const getAllTokens = createSelector(
     (state: RootState) => getUserBalances(state),
   ],
   (
-    apiTokens: Map<Address, APIToken>,
-    apiPools: Map<Address, APIPool>,
+    apiTokens: APIToken[],
+    apiPools: APIPool[],
     tlTokens: ITokenListToken[],
     tlFallback: ITokenListToken[],
     balances?: Map<Address, string>
   ): Token[] => {
-    const pools = Array.from(apiPools.values());
     const fallbackTokens = new Map(
       tlFallback.map((t) => [t.address.toLowerCase(), t])
     );
@@ -145,9 +146,15 @@ export const getAllTokens = createSelector(
     );
 
     // Return all tokens
-    return Array.from(apiTokens, ([_, apiToken]: [string, APIToken]) => {
+    return apiTokens.map((apiToken) => {
       const tlToken = tokenListTokens.get(apiToken.dlt_id.toLowerCase());
-      return buildToken({ apiToken, pools, fallbackTokens, balances, tlToken });
+      return buildToken({
+        apiToken,
+        apiPools,
+        fallbackTokens,
+        balances,
+        tlToken,
+      });
     });
   }
 );
