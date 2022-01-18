@@ -1,11 +1,7 @@
 import { useState } from 'react';
 import { InputField } from 'components/inputField/InputField';
 import { useAppSelector } from 'redux/index';
-import {
-  TokenList,
-  Token,
-  userPreferredListIds$,
-} from 'services/observables/tokens';
+import { Token } from 'services/observables/tokens';
 import { Modal } from 'components/modal/Modal';
 import { ModalFullscreen } from 'components/modalFullscreen/ModalFullscreen';
 import { Switch } from '@headlessui/react';
@@ -14,9 +10,14 @@ import { wait } from 'utils/pureFunctions';
 import { Image } from 'components/image/Image';
 import { ReactComponent as IconEdit } from 'assets/icons/edit.svg';
 import { ReactComponent as IconTimes } from 'assets/icons/times.svg';
-import { getTokenListLS, setTokenListLS } from 'utils/localStorage';
 import { isMobile } from 'react-device-detect';
 import { SuggestedTokens } from './SuggestedTokens';
+import {
+  ITokenList,
+  setSelectedTokenList,
+  TokenListName,
+} from 'redux/bancor2/tokenLists.slice';
+import { useDispatch } from 'react-redux';
 
 interface SearchableTokenListProps {
   onClick: Function;
@@ -85,10 +86,12 @@ export const SearchableTokenList = ({
 }: SearchableTokenListProps) => {
   const [search, setSearch] = useState('');
   const [manage, setManage] = useState(false);
-  const [userPreferredListIds, setUserLists] = useState(getTokenListLS());
-
-  const tokensLists = useAppSelector<TokenList[]>(
-    (state) => state.bancor.tokenLists
+  const dispatch = useDispatch();
+  const tokensLists = useAppSelector<ITokenList[]>(
+    (state) => state.tokenLists.tokenLists
+  );
+  const userPreferredListIds = useAppSelector<TokenListName[]>(
+    (state) => state.tokenLists.selectedTokenList
   );
 
   const onClose = async () => {
@@ -98,18 +101,8 @@ export const SearchableTokenList = ({
     setSearch('');
   };
 
-  const handleTokenlistClick = (listId: string) => {
-    const alreadyPreferred = userPreferredListIds.includes(listId);
-
-    const newUserPreferredListIds = alreadyPreferred
-      ? userPreferredListIds.filter((list) => list !== listId)
-      : [...userPreferredListIds, listId];
-
-    if (newUserPreferredListIds.length === 0) return;
-
-    setTokenListLS(newUserPreferredListIds);
-    setUserLists(newUserPreferredListIds);
-    userPreferredListIds$.next(newUserPreferredListIds);
+  const handleTokenlistClick = (listId: TokenListName) => {
+    dispatch(setSelectedTokenList(listId));
   };
 
   const tokenName = (name: string) => {
@@ -206,7 +199,7 @@ export const SearchableTokenList = ({
               />
             </div>
             <hr className="border-grey-2 dark:border-blue-1" />
-
+            <div>{tokens.length}</div>
             {tokens
               .filter(
                 (token) =>
@@ -249,7 +242,6 @@ export const SearchableTokenList = ({
           <div className="flex justify-center items-center h-[59px] my-5">
             <button
               onClick={() => {
-                setUserLists(getTokenListLS());
                 setManage(true);
               }}
               className="text-primary font-semibold"

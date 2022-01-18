@@ -30,7 +30,7 @@ import { fetchKeeperDaoTokens } from 'services/api/keeperDao';
 import { fetchTokenBalances } from './balances';
 import { calculatePercentageChange, shrinkToken } from 'utils/formulas';
 import { isEqual, sortBy, uniqBy } from 'lodash';
-import { APIReward, WelcomeData } from 'services/api/bancor';
+import { APIReward, APIData } from 'services/api/bancor';
 import BigNumber from 'bignumber.js';
 import { UTCTimestamp } from 'lightweight-charts';
 import { settingsContractAddress$ } from 'services/observables/contracts';
@@ -42,7 +42,7 @@ import { findPoolByConverter } from '../../utils/helperFunctions';
 
 export const apiTokens$ = apiData$.pipe(
   pluck('tokens'),
-  distinctUntilChanged<WelcomeData['tokens']>(isEqual),
+  distinctUntilChanged<APIData['tokens']>(isEqual),
   share()
 );
 

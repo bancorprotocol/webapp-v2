@@ -1,5 +1,6 @@
 import { initialState as UserState } from 'redux/user/user';
 import { Notification } from 'redux/notification/notification';
+import { TokenListName } from 'redux/bancor2/tokenLists.slice';
 
 const selected_lists = 'userTokenLists';
 const autoLogin = 'loginAuto';
@@ -9,12 +10,12 @@ const usdToggle = 'usdToggle';
 const notifications = 'notifications';
 const showBanner = 'showBanner';
 
-export const getTokenListLS = (): string[] => {
+export const getTokenListLS = (): TokenListName[] => {
   const list = localStorage.getItem(selected_lists);
-  return list ? JSON.parse(list) : [];
+  return list ? JSON.parse(list) : undefined;
 };
 
-export const setTokenListLS = (userListIds: string[]) => {
+export const setTokenListLS = (userListIds: TokenListName[]) => {
   localStorage.setItem(selected_lists, JSON.stringify(userListIds));
 };
 

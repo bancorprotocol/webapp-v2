@@ -12,7 +12,7 @@ interface TokenMeta {
   precision?: number;
 }
 
-export interface WelcomeData {
+export interface APIData {
   total_liquidity: {
     usd: string;
     bnt: string;
@@ -85,7 +85,7 @@ export interface NewPool extends APIPool {
   decFee: number;
 }
 
-export interface WelcomeDataRes extends WelcomeData {
+export interface WelcomeDataRes extends APIData {
   network: EthNetworks;
 }
 
@@ -96,7 +96,7 @@ export const getWelcomeData = async (
     throw new Error('API does not support this network');
   }
   try {
-    const { data } = await axios.get<WelcomeData>(
+    const { data } = await axios.get<APIData>(
       network === EthNetworks.Mainnet
         ? 'https://api-v2.bancor.network/welcome'
         : 'https://serve-ropsten-ptdczarhfq-nw.a.run.app/welcome'
@@ -104,6 +104,7 @@ export const getWelcomeData = async (
     return {
       ...data,
       network,
+      // TODO remove address normalization
       pools: data.pools.map((pool) => ({
         ...pool,
         converter_dlt_id: utils.getAddress(pool.converter_dlt_id),

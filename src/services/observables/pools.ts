@@ -1,4 +1,4 @@
-import { getWelcomeData, WelcomeData } from 'services/api/bancor';
+import { getWelcomeData, APIData } from 'services/api/bancor';
 import { isEqual, zip } from 'lodash';
 import { combineLatest } from 'rxjs';
 import {
@@ -29,7 +29,7 @@ export const apiData$ = combineLatest([currentNetwork$, fifteenSeconds$]).pipe(
 
 export const apiTokens$ = apiData$.pipe(
   pluck('tokens'),
-  distinctUntilChanged<WelcomeData['tokens']>(isEqual),
+  distinctUntilChanged<APIData['tokens']>(isEqual),
   share()
 );
 
@@ -67,7 +67,7 @@ const anchorAndConverters$ = combineLatest([
 
 const apiPools$ = apiData$.pipe(
   pluck('pools'),
-  distinctUntilChanged<WelcomeData['pools']>(isEqual),
+  distinctUntilChanged<APIData['pools']>(isEqual),
   shareReplay(1)
 );
 
@@ -137,7 +137,7 @@ export const correctedPools$ = combineLatest([
       }
     );
   }),
-  distinctUntilChanged<WelcomeData['pools']>(isEqual),
+  distinctUntilChanged<APIData['pools']>(isEqual),
   shareReplay(1)
 );
 
