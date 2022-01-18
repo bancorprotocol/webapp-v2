@@ -6,7 +6,7 @@ import {
 } from './tokenLists.selector';
 import { APIData, APIPool, APIToken } from 'services/api/bancor';
 import { Token } from 'services/observables/tokens';
-import { ropstenImage } from 'services/web3/config';
+import { buildWethToken, ropstenImage } from 'services/web3/config';
 import { ITokenListToken } from './tokenLists.slice';
 import { Address } from 'services/web3/types';
 import { getUserBalances } from './userData.selector';
@@ -141,6 +141,9 @@ export const getAllTokens = createSelector(
       return [];
     }
 
+    const wethToken = buildWethToken(apiData.tokens);
+    const apiTokens = [...apiData.tokens, wethToken];
+
     const fallbackTokens = new Map(
       tlFallback.map((t) => [t.address.toLowerCase(), t])
     );
@@ -149,7 +152,7 @@ export const getAllTokens = createSelector(
     );
 
     // Return all tokens
-    return apiData.tokens.map((apiToken) => {
+    return apiTokens.map((apiToken) => {
       const tlToken = tokenListTokens.get(apiToken.dlt_id.toLowerCase());
       return buildToken({
         apiToken,
