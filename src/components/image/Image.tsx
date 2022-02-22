@@ -1,4 +1,4 @@
-import { SyntheticEvent, useState } from 'react';
+import { SyntheticEvent, useRef, useState } from 'react';
 import { classNameGenerator } from 'utils/pureFunctions';
 import { ropstenImage } from 'services/web3/config';
 
@@ -11,15 +11,15 @@ interface ImageProps {
 
 export const Image = ({ src, alt, className, lazy = true }: ImageProps) => {
   const [loaded, setLoaded] = useState(false);
-  const [attemptedFallback, setAttemptedFallback] = useState(false);
+  const attemptedFallback = useRef(false);
 
   const imageOnErrorHandler = (
     event: SyntheticEvent<HTMLImageElement, Event>
   ) => {
-    if (attemptedFallback) {
+    if (attemptedFallback.current) {
       return;
     }
-    setAttemptedFallback(true);
+    attemptedFallback.current = true;
     event.currentTarget.src = ropstenImage;
     event.currentTarget.onerror = null;
   };
