@@ -9,15 +9,20 @@ interface ImageProps {
   lazy?: boolean;
 }
 
-const imageOnErrorHandler = (
-  event: SyntheticEvent<HTMLImageElement, Event>
-) => {
-  event.currentTarget.src = ropstenImage;
-  event.currentTarget.onerror = null;
-};
-
 export const Image = ({ src, alt, className, lazy = true }: ImageProps) => {
   const [loaded, setLoaded] = useState(false);
+  const [attemptedFallback, setAttemptedFallback] = useState(false);
+
+  const imageOnErrorHandler = (
+    event: SyntheticEvent<HTMLImageElement, Event>
+  ) => {
+    if (attemptedFallback) {
+      return;
+    }
+    setAttemptedFallback(true);
+    event.currentTarget.src = ropstenImage;
+    event.currentTarget.onerror = null;
+  };
 
   return (
     <img
