@@ -165,7 +165,7 @@ export const swap = async (
       { value: fromIsEth ? fromWei : undefined, gasLimit }
     );
 
-    sendConversionEvent(ConversionEvents.wallet_confirm);
+    sendConversionEvent(ConversionEvents.wallet_confirm, tx.hash);
 
     onHash(tx.hash);
     await tx.wait();
