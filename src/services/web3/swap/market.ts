@@ -123,7 +123,7 @@ export const swap = async (
   fromAmount: string,
   toAmount: string,
   onHash: (txHash: string) => void,
-  onCompleted: Function,
+  onCompleted: (txHash: string) => void,
   rejected: Function,
   failed: (error: string) => void
 ) => {
@@ -165,11 +165,11 @@ export const swap = async (
       { value: fromIsEth ? fromWei : undefined, gasLimit }
     );
 
-    sendConversionEvent(ConversionEvents.wallet_confirm);
+    sendConversionEvent(ConversionEvents.wallet_confirm, tx.hash);
 
     onHash(tx.hash);
     await tx.wait();
-    onCompleted();
+    onCompleted(tx.hash);
   } catch (e: any) {
     console.error('Swap failed with error: ', e);
 
