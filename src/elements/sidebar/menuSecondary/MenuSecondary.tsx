@@ -55,7 +55,7 @@ const menu: SecondaryMenuItem[] = [
       },
       {
         label: 'Discord',
-        to: 'https://discord.gg/CAm3Ncyrxk',
+        to: 'https://discord.gg/aMVTbrmgD7',
         icon: <IconDiscord />,
       },
     ],
