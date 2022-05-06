@@ -218,6 +218,7 @@ export const WithdrawLiquidityWidget = ({
     onStart,
     pool.name,
     setIsModalOpen,
+    tknAmount,
     token,
     withdraw,
     withdrawingBNT,
