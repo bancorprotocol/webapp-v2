@@ -6,7 +6,7 @@ import { RewardsClaimCTA } from 'elements/earn/portfolio/liquidityProtection/rew
 import { useNavigation } from 'services/router';
 
 export const RewardsClaim = () => {
-  const { claimableRewards, account } = useRewardsClaim({});
+  const { claimableRewards } = useRewardsClaim({});
   const { pushPortfolio } = useNavigation();
 
   return (
@@ -14,10 +14,7 @@ export const RewardsClaim = () => {
       <div className="px-10 pb-10">
         <RewardsClaimInfo />
         <RewardsClaimAmount amount={claimableRewards} />
-        <RewardsClaimCTA
-          account={account}
-          claimableRewards={claimableRewards}
-        />
+        <RewardsClaimCTA />
       </div>
     </Widget>
   );

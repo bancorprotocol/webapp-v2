@@ -1,47 +1,31 @@
-import { claimRewards } from 'services/web3/protection/rewards';
 import { StakeRewardsBtn } from 'elements/earn/portfolio/liquidityProtection/rewards/StakeRewardsBtn';
-import {
-  claimRewardsFailedNotification,
-  claimRewardsNotification,
-} from 'services/notifications/notifications';
-import { useDispatch } from 'react-redux';
-import { useNavigation } from 'services/router';
+import { Tooltip } from 'components/tooltip/Tooltip';
 
-interface Props {
-  claimableRewards: string | null;
-  account?: string | null;
-}
-
-export const RewardsClaimCTA = ({ claimableRewards, account }: Props) => {
-  const dispatch = useDispatch();
-  const { pushPortfolio } = useNavigation();
-
+export const RewardsClaimCTA = () => {
   const handleClaim = async () => {
-    if (account && claimableRewards) {
-      try {
-        const txHash = await claimRewards();
-        claimRewardsNotification(dispatch, txHash, claimableRewards);
-        pushPortfolio();
-      } catch (e: any) {
-        console.error('Claiming Rewards failed with msg: ', e.message);
-        claimRewardsFailedNotification(dispatch);
-      }
-    }
+    console.info(
+      'Rewards were disabled as part of the V3 upgrade and will be available again shortly'
+    );
   };
 
   return (
-    <>
+    <div className="flex justify-between ml-10 mr-10">
       <StakeRewardsBtn
         buttonLabel="Stake my Rewards"
         buttonClass="btn-primary rounded w-full mt-20"
       />
-      <button
-        onClick={() => handleClaim()}
-        className="btn-outline-primary rounded w-full mt-10"
-        disabled={!account}
-      >
-        Withdraw Rewards
-      </button>
-    </>
+      <Tooltip
+        content="Rewards were disabled as part of the V3 upgrade and will be available again shortly"
+        button={
+          <button
+            onClick={() => handleClaim()}
+            className="w-full mt-20 rounded btn-outline-primary"
+            disabled
+          >
+            Withdraw Rewards
+          </button>
+        }
+      />
+    </div>
   );
 };

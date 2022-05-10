@@ -4,6 +4,7 @@ import { Pool } from 'services/observables/tokens';
 import { getProtectedPools } from 'redux/bancor/pool';
 import { SelectPoolModal } from 'components/selectPoolModal/SelectPoolModal';
 import { useNavigation } from 'services/router';
+import { Tooltip } from 'components/tooltip/Tooltip';
 
 interface Props {
   buttonLabel: string;
@@ -25,17 +26,32 @@ export const StakeRewardsBtn = ({
     else pushRewardsStakeByID(pool.pool_dlt_id);
   };
 
+  const handleOpenClose = (open: boolean) => {
+    if (open) {
+      console.info(
+        'Rewards were disabled as part of the V3 upgrade and will be available again shortly'
+      );
+      return;
+    }
+    setIsModalOpen(false);
+  };
+
   return (
     <>
       <SelectPoolModal
         pools={pools}
         isOpen={isModalOpen}
-        setIsOpen={setIsModalOpen}
+        setIsOpen={handleOpenClose}
         onSelect={onSelect}
       />
-      <button onClick={() => setIsModalOpen(true)} className={buttonClass}>
-        {buttonLabel}
-      </button>
+      <Tooltip
+        content="Rewards were disabled as part of the V3 upgrade and will be available again shortly"
+        button={
+          <button onClick={() => handleOpenClose(true)} className={buttonClass} disabled>
+            {buttonLabel}
+          </button>
+        }
+      />
     </>
   );
 };
